@@ -1,0 +1,9 @@
+pandoc: '3.13'
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  session: session.html
+last_built: 2026-11-10T19:25Z
+urls:
+  reference: https://jeksterslab.github.io/betaLB//reference
+  article: https://jeksterslab.github.io/betaLB//articles
