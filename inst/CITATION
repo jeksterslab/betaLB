@@ -1,0 +1,13 @@
+utils::bibentry(
+  bibtype = "Manual",
+  title = paste0(meta$Package, ": ", meta$Title),
+  author = utils::personList(
+    utils::person(
+      given = "Ivan Jacob Agaloos",
+      family = "Pesigan"
+    )
+  ),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  url = "https://github.com/jeksterslab/betaLB"
+)
