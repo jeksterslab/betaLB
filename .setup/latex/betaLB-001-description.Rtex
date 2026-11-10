@@ -1,0 +1,110 @@
+\documentclass{article}
+
+\input{.setup/latex/preamble/preamble}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BIBLATEX APA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% begin.rcode
+% #| label = "root",
+% #| include = FALSE
+% root <- rprojroot::is_rstudio_project
+%% end.rcode
+
+%% begin.rcode
+% #| label = "knitr",
+% #| include = FALSE,
+% #| file = root$find_file(
+% #|   ".setup",
+% #|   "latex",
+% #|   "r-scripts",
+% #|   "knitr.R"
+% #| )
+%% end.rcode
+
+%% begin.rcode
+% #| label = "biblatex",
+% #| echo = FALSE,
+% #| message = FALSE,
+% #| warning = FALSE,
+% #| results = "asis"
+% if (requireNamespace(package = "rProject", quietly = TRUE)) {
+%   rProject::Bib(
+%     path = dirname(
+%       path = root$find_file(
+%         "project.Rproj"
+%       )
+%     )
+%   )
+%   cat(
+%     rProject:::.PreambleBiblatex(
+%       path = root$find_file(
+%         ".setup",
+%         "latex",
+%         "bib"
+%       )
+%     )
+%   )
+% } else {
+%   cat(
+%     rProject:::.PreambleBiblatexCombined(
+%       path = root$find_file(
+%         ".setup",
+%         "latex",
+%         "bib"
+%       ),
+%       output_path = root$find_file(
+%         ".setup",
+%         "latex"
+%       )
+%     )
+%   )
+% }
+%% end.rcode
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes}
+\author{Ivan Jacob Agaloos Pesigan}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Description}
+
+Generates profile likelihood confidence intervals
+for standardized regression coefficients (beta) and other effect sizes,
+including multiple correlation, semipartial correlations,
+improvement in R-squared, squared partial correlations,
+differences in standardized regression coefficients,
+and Cohen's f-squared,
+for models fitted by \texttt{lm()}.
+
+\section*{Installation}
+
+You can install the development version of \texttt{betaLB} from
+\href{https://github.com/jeksterslab/betaLB}{GitHub}
+with:
+
+%% begin.rcode
+% #| eval = FALSE
+% if (!requireNamespace(package = "pak", quietly = TRUE)) {
+%   utils::install.packages(pkgs = "pak")
+% }
+% pak::pkg_install(pkg = "jeksterslab/betaLB")
+%% end.rcode
+
+\section*{More Information}
+
+See
+\href{https://jeksterslab.github.io/betaLB/index.html}{GitHub Pages}
+for package documentation.
+
+\nocite{RCoreTeam-2026}
+
+\printbibliography
+
+\end{document}

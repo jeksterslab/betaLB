@@ -1,0 +1,90 @@
+name: Source Code
+
+on:
+  workflow_run:
+    workflows: [ "Make Project" ]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: "Run in the latest image and packages, not the lock's"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  # the image and packages of the release (.setup/scripts/rproject.lock);
+  # a scheduled run, or a manual run with latest, uses the latest
+  image:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.lock.outputs.image }}
+      snapshot: ${{ steps.lock.outputs.snapshot }}
+      r_version: ${{ steps.lock.outputs.r_version }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .setup/scripts
+      -
+        name: Read the lock
+        id: lock
+        env:
+          EVENT: ${{ github.event_name }}
+          LATEST: ${{ inputs.latest }}
+        run: bash .setup/scripts/image-lock.sh
+
+  build:
+    needs: image
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ needs.image.outputs.image }}
+    env:
+      RPROJECT_SNAPSHOT: ${{ needs.image.outputs.snapshot }}
+      GITHUB_PAT: ${{ secrets.PAT }}
+      GITHUB_ACTIONS: "true"
+    permissions:
+      contents: write
+
+    steps:
+      -
+        name: Checkout 
+        uses: actions/checkout@v7
+      -
+        name: Clean
+        run: |
+          make clean
+      -
+        name: Make Project
+        run: |
+          make push
+      -
+        name: Copy files
+        run: |
+          WD="$PWD"
+          mkdir -p r_source_code
+          tar -xf .setup/build/*.tar.gz -C r_source_code
+          DIR=$(ls r_source_code)
+          cd "r_source_code/$DIR"
+          mv ./* "$WD/r_source_code"
+          cd ..
+          rm -rf "$DIR"
+      - 
+        name: Reset working tree
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git reset --hard HEAD
+      - 
+        name: Push to the src branch
+        uses: s0/git-publish-subdir-action@v2.6.0
+        env:
+          REPO: self
+          BRANCH: src
+          FOLDER: r_source_code
+          GITHUB_TOKEN: ${{ secrets.PAT }}

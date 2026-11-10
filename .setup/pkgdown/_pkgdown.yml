@@ -1,0 +1,30 @@
+destination: pkgdown
+url: https://github.com/jeksterslab/betaLB/
+
+template:
+  package: rProject
+
+reference:
+- title: Likelihood Engine
+  contents:
+  - LB
+- title: Effect Sizes
+  contents:
+  - BetaLB
+  - RSqLB
+  - SCorLB
+  - PCorLB
+  - DeltaRSqLB
+  - DiffBetaLB
+  - FSqLB
+- title: Methods
+  contents:
+  - has_keyword("methods")
+- title: Data
+  contents:
+  - has_keyword("data")
+
+articles:
+- title: Session Information
+  contents:
+  - session

@@ -1,0 +1,95 @@
+name: Compile LaTeX
+
+on:
+  workflow_run:
+    workflows: [ "Make Project" ]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: "Run in the latest image and packages, not the lock's"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  # the image and packages of the release (.setup/scripts/rproject.lock);
+  # a scheduled run, or a manual run with latest, uses the latest
+  image:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.lock.outputs.image }}
+      snapshot: ${{ steps.lock.outputs.snapshot }}
+      r_version: ${{ steps.lock.outputs.r_version }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .setup/scripts
+      -
+        name: Read the lock
+        id: lock
+        env:
+          EVENT: ${{ github.event_name }}
+          LATEST: ${{ inputs.latest }}
+        run: bash .setup/scripts/image-lock.sh
+
+  build:
+    needs: image
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ needs.image.outputs.image }}
+    concurrency:
+      group: latex-${{ github.event_name != 'pull_request' || github.run_id }}
+    env:
+      RPROJECT_SNAPSHOT: ${{ needs.image.outputs.snapshot }}
+      GITHUB_PAT: ${{ secrets.PAT }}
+      GITHUB_ACTIONS: "true"
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v7
+
+      - name: Make Project
+        run: make build
+
+      - name: Make LaTeX
+        run: |
+          rm -rf .setup/latex/bib/bib.bib || true
+          rm -rf .setup/latex/bib/quarto.bib || true
+          make bibrproject
+          make pdf
+
+      - name: Copy output to clean folder
+        run: |
+          mkdir -p publish
+          cp .setup/latex/pdf/*.pdf publish/ || true
+          cp .setup/latex/pdf/*.bib publish/ || true
+          cp .setup/latex/pdf/.gitignore publish/ || true
+
+      - name: Publish to latex branch manually
+        run: |
+          cd publish
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add origin https://x-access-token:${GITHUB_PAT}@github.com/${{ github.repository }}.git
+          git checkout -b latex
+          git add .
+          git commit -m "Publish LaTeX artifacts"
+          git push origin latex --force
+        env:
+          GITHUB_PAT: ${{ secrets.PAT }}
+
+      - name: Make clean
+        run: |
+          make bibrproject
+          make pdf

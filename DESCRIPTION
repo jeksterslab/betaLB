@@ -1,0 +1,40 @@
+Package: betaLB
+Title: Likelihood-Based Confidence Intervals for Regression Effect Sizes
+Version: 0.0.0.9001
+Authors@R:
+    person(given = "Ivan Jacob Agaloos",
+           family = "Pesigan",
+           role = c("aut", "cre", "cph"),
+           email = "r.jeksterslab@gmail.com",
+           comment = c(ORCID = "0000-0003-4818-8420"))
+Description: Generates profile likelihood confidence intervals
+    for standardized regression coefficients (beta) and other effect sizes,
+    including multiple correlation, semipartial correlations,
+    improvement in R-squared, squared partial correlations,
+    differences in standardized regression coefficients,
+    and Cohen's f-squared, for models fitted by lm().
+URL: https://github.com/jeksterslab/betaLB, https://jeksterslab.github.io/betaLB/
+BugReports: https://github.com/jeksterslab/betaLB/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 3.5.0)
+Imports:
+    Rcpp,
+    stats,
+    utils
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat,
+    MASS,
+    lavaan,
+    semlbci,
+    nloptr,
+    bench
+Config/roxygen2/version: 8.1.1.9000

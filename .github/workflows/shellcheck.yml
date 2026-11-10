@@ -1,0 +1,24 @@
+name: Shell Check
+
+on:
+  workflow_run:
+    workflows: [ "Make Project" ]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout 
+        uses: actions/checkout@v7
+      -
+        name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0

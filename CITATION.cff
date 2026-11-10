@@ -1,0 +1,40 @@
+# ------------------------------------------------
+# CITATION.cff file created with {cffr} R package
+# See also: https://docs.ropensci.org/cffr/
+# ------------------------------------------------
+ 
+cff-version: 1.2.0
+message: 'To cite package "betaLB" in publications use:'
+type: software
+license: MIT
+title: 'betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes'
+version: 0.0.0.9001
+abstract: Generates profile likelihood confidence intervals for standardized regression
+  coefficients (beta) and other effect sizes, including multiple correlation, semipartial
+  correlations, improvement in R-squared, squared partial correlations, differences
+  in standardized regression coefficients, and Cohen's f-squared, for models fitted
+  by lm().
+authors:
+- family-names: Pesigan
+  given-names: Ivan Jacob Agaloos
+  email: r.jeksterslab@gmail.com
+  orcid: https://orcid.org/0000-0003-4818-8420
+preferred-citation:
+  type: manual
+  title: 'betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes'
+  authors:
+  - family-names: Pesigan
+    given-names: Ivan Jacob Agaloos
+    email: r.jeksterslab@gmail.com
+    orcid: https://orcid.org/0000-0003-4818-8420
+  year: '2026'
+  notes: R package version 0.0.0.9001
+  url: https://github.com/jeksterslab/betaLB
+repository-code: https://github.com/jeksterslab/betaLB
+url: https://jeksterslab.github.io/betaLB/
+contact:
+- family-names: Pesigan
+  given-names: Ivan Jacob Agaloos
+  email: r.jeksterslab@gmail.com
+  orcid: https://orcid.org/0000-0003-4818-8420
+

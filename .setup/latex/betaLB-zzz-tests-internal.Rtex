@@ -1,0 +1,125 @@
+\documentclass{article}
+
+\input{.setup/latex/preamble/preamble}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BIBLATEX APA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% begin.rcode
+% #| label = "root",
+% #| include = FALSE
+% root <- rprojroot::is_rstudio_project
+%% end.rcode
+
+%% begin.rcode
+% #| label = "knitr",
+% #| include = FALSE,
+% #| file = root$find_file(
+% #|   ".setup",
+% #|   "latex",
+% #|   "r-scripts",
+% #|   "knitr.R"
+% #| )
+%% end.rcode
+
+%% begin.rcode
+% #| label = "biblatex",
+% #| echo = FALSE,
+% #| message = FALSE,
+% #| warning = FALSE,
+% #| results = "asis"
+% if (requireNamespace(package = "rProject", quietly = TRUE)) {
+%   rProject::Bib(
+%     path = dirname(
+%       path = root$find_file(
+%         "project.Rproj"
+%       )
+%     )
+%   )
+%   cat(
+%     rProject:::.PreambleBiblatex(
+%       path = root$find_file(
+%         ".setup",
+%         "latex",
+%         "bib"
+%       )
+%     )
+%   )
+% } else {
+%   cat(
+%     rProject:::.PreambleBiblatexCombined(
+%       path = root$find_file(
+%         ".setup",
+%         "latex",
+%         "bib"
+%       ),
+%       output_path = root$find_file(
+%         ".setup",
+%         "latex"
+%       )
+%     )
+%   )
+% }
+%% end.rcode
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{betaLB: Internal Tests}
+\author{Ivan Jacob Agaloos Pesigan}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%% begin.rcode
+% #| include = FALSE
+% Sys.setenv(NOT_CRAN = "true")
+%% end.rcode
+
+\section*{Tests}
+
+%% begin.rcode
+% #| file = root$find_file(
+% #|   ".setup",
+% #|   "latex",
+% #|   "r-scripts",
+% #|   "tests.R"
+% #| ),
+% #| echo = FALSE
+%% end.rcode
+
+\newpage
+
+\section*{Environment}
+
+%% begin.rcode
+% ls()
+%% end.rcode
+
+\newpage
+
+\section*{Class}
+
+%% begin.rcode
+% #| echo = FALSE
+% lapply(
+%   X = ls(),
+%   FUN = function(x) {
+%     class(
+%       eval(
+%         parse(
+%           text = x
+%         )
+%       )
+%     )
+%   }
+% )
+%% end.rcode
+
+\nocite{RCoreTeam-2026}
+
+\printbibliography
+
+\end{document}

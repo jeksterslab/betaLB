@@ -1,0 +1,48 @@
+---
+title: "betaLB: Session"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{betaLB: Session}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| include = FALSE
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/vignettes-"
+)
+```
+
+```{r}
+library(package = betaLB)
+```
+
+# Session
+
+```{r}
+utils::sessionInfo()
+```
+
+## Packages
+
+```{r}
+utils::installed.packages()[, c("Package", "Version")]
+```
+
+## CPU
+
+```{r}
+#| echo = FALSE
+cat(system(command = "lscpu", intern = TRUE), sep = "\n")
+```
+
+## Memory
+
+```{r}
+#| echo = FALSE
+cat(system(command = "free -g -h -t", intern = TRUE), sep = "\n")
+```

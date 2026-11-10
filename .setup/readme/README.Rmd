@@ -1,0 +1,70 @@
+---
+title: "betaLB"
+author: "Ivan Jacob Agaloos Pesigan"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+<!-- README.md is generated from .setup/readme/README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## Description
+
+Generates profile likelihood confidence intervals
+for standardized regression coefficients (beta) and other effect sizes,
+including multiple correlation, semipartial correlations,
+improvement in R-squared, squared partial correlations,
+differences in standardized regression coefficients,
+and Cohen's f-squared, for models fitted by `lm()`.
+
+## Installation
+
+You can install the development version of `betaLB` from
+[GitHub](https://github.com/jeksterslab/betaLB) with:
+
+```r
+if (!requireNamespace(package = "pak", quietly = TRUE)) {
+  utils::install.packages(pkgs = "pak")
+}
+pak::pkg_install(pkg = "jeksterslab/betaLB")
+```
+
+## Likelihood intervals
+
+Fit once for the effect families, calibration types and confidence levels needed.
+Extractors select stored results without refitting.
+
+```{r likelihood-example}
+fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+out <- betaLB::LB(
+  object = fit,
+  effects = c("beta", "rsq"),
+  type = c("mvn", "robust"),
+  alpha = c(0.05, 0.10)
+)
+betaLB::BetaLB(object = out)
+stats::confint(object = betaLB::RSqLB(object = out), type = "robust")
+```
+
+Scalar targets use profile-likelihood regions.
+Multi-coefficient R-squared and block effects use conservative vector projection;
+the output identifies this calibration and its dimension.
+Robust calibration assumes independently sampled random regressors and finite
+fourth moments. It does not supply fixed-regressor or clustered-data inference.
+
+`out$intervals` contains every computed band and its endpoint statuses.
+`out$diagnostics` retains numerical verification details.
+An unverified endpoint is `NA`; no Wald endpoint is substituted.
+Adjusted R-squared is an explicitly sample-size-dependent transformation,
+and its interval can have a negative lower bound.
