@@ -13,6 +13,8 @@
   Likelihood Intervals for R-Squared and Its Finite-Sample Adjustment
 - [`SCorLB()`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md)
   : Likelihood Intervals for Signed Semipartial Correlations
+- [`SCorSqLB()`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md)
+  : Squared Signed-Semipartial Confidence Intervals
 - [`PCorLB()`](https://jeksterslab.github.io/betaLB/reference/PCorLB.md)
   : Likelihood Intervals for Squared Partial Correlations
 - [`DeltaRSqLB()`](https://jeksterslab.github.io/betaLB/reference/DeltaRSqLB.md)
