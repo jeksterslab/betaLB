@@ -13,6 +13,7 @@ reference:
   - BetaLB
   - RSqLB
   - SCorLB
+  - SCorSqLB
   - PCorLB
   - DeltaRSqLB
   - DiffBetaLB

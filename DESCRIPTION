@@ -1,6 +1,6 @@
 Package: betaLB
 Title: Likelihood-Based Confidence Intervals for Regression Effect Sizes
-Version: 0.0.0.9001
+Version: 0.0.0.9002
 Authors@R:
     person(given = "Ivan Jacob Agaloos",
            family = "Pesigan",

@@ -8,7 +8,7 @@ message: 'To cite package "betaLB" in publications use:'
 type: software
 license: MIT
 title: 'betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes'
-version: 0.0.0.9001
+version: 0.0.0.9002
 abstract: Generates profile likelihood confidence intervals for standardized regression
   coefficients (beta) and other effect sizes, including multiple correlation, semipartial
   correlations, improvement in R-squared, squared partial correlations, differences
@@ -28,7 +28,7 @@ preferred-citation:
     email: r.jeksterslab@gmail.com
     orcid: https://orcid.org/0000-0003-4818-8420
   year: '2026'
-  notes: R package version 0.0.0.9001
+  notes: R package version 0.0.0.9002
   url: https://github.com/jeksterslab/betaLB
 repository-code: https://github.com/jeksterslab/betaLB
 url: https://jeksterslab.github.io/betaLB/

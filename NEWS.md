@@ -1,3 +1,7 @@
+# betaLB 0.0.0.9002
+
+- Add SCorSqLB() for the image of a signed-semipartial interval under squaring.
+
 # betaLB 0.0.0.9001
 
 ## Added
