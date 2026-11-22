@@ -1,0 +1,95 @@
+---
+title: "betaLB: Example Using the BetaLB Function"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @NationalResearchCouncil-1982
+vignette: >
+  %\VignetteIndexEntry{betaLB: Example Using the BetaLB Function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+Profile likelihood confidence intervals for the standardized regression coefficients are generated
+using the `BetaLB()` function from the `betaLB` package.
+
+```{r}
+#| message = FALSE
+library(package = betaLB)
+```
+
+```{r}
+df <- betaLB::nas1982
+```
+
+## Fit the regression model using the `lm()` function.
+
+```{r}
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+## Estimate the standardized regression slopes and the likelihood intervals.
+
+With `type = "mvn"`, the cutoff assumes multivariate normality.
+With `type = "robust"`, the cutoff is scaled by the sample fourth moments
+and the intervals do not require normality.
+The solver runs once per significance level in `alpha`.
+
+```{r}
+std_mvn <- BetaLB(object = object, type = "mvn", alpha = c(0.05, 0.01))
+std_robust <- BetaLB(object = object, type = "robust", alpha = c(0.05, 0.01))
+std_robust
+```
+
+## Methods
+
+The `print()`, `summary()`, `coef()`, and `confint()` methods are available.
+The `confint()` method accepts only the levels (`1 - alpha`) that were computed.
+A covariance matrix is not defined for likelihood-based intervals,
+so `vcov()` stops with a message.
+
+```{r}
+summary(object = std_robust, alpha = 0.05)
+coef(object = std_robust)
+confint(object = std_robust, level = 0.95)
+```
+
+## Selective standardization
+
+Use `std_y` and `std_x` to standardize only the outcome or only some of the regressors.
+`std_x = NULL` standardizes all regressors and `std_x = character(0)` standardizes none.
+
+```{r}
+BetaLB(
+  object = object,
+  type = "mvn",
+  alpha = 0.05,
+  std_y = TRUE,
+  std_x = c("NARTIC", "PCTGRT")
+)
+```
+
+## Comparing calibrations
+
+```{r}
+confint(object = std_mvn, level = 0.95)
+confint(object = std_robust, level = 0.95)
+```
+
+## References

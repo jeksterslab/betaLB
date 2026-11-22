@@ -4,17 +4,20 @@ lapply(X = 1, FUN = function(i, text) {
   testthat::test_that(
     desc = paste(text, "preserves the regression estimand"),
     code = {
-      out <- betaLB::SCorLB(object = .LBFixture())
-      fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+      out <- betaLB::SCorLB(object = .LBFixture(), alpha = 0.05)
+      fit <- stats::lm(
+        formula = QUALITY ~ NARTIC + PCTGRT,
+        data = betaLB::nas1982
+      )
       full <- summary(object = fit)$r.squared
       increments <- full - c(
         summary(object = stats::lm(
-          formula = mpg ~ hp,
-          data = mtcars
+          formula = QUALITY ~ PCTGRT,
+          data = betaLB::nas1982
         ))$r.squared,
         summary(object = stats::lm(
-          formula = mpg ~ wt,
-          data = mtcars
+          formula = QUALITY ~ NARTIC,
+          data = betaLB::nas1982
         ))$r.squared
       )
       expected <- sign(x = stats::coef(object = fit)[-1L]) *

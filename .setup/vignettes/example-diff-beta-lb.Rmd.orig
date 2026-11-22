@@ -1,0 +1,79 @@
+---
+title: "betaLB: Example Using the DiffBetaLB Function"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @NationalResearchCouncil-1982
+vignette: >
+  %\VignetteIndexEntry{betaLB: Example Using the DiffBetaLB Function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+
+```{r}
+#| message = FALSE
+library(package = betaLB)
+```
+
+```{r}
+#| echo = FALSE
+if (!exists(x = "nas1982")) {
+  try(
+    expr = utils::data(
+      "nas1982",
+      package = "betaLB"
+    ),
+    silent = TRUE
+  )
+}
+df <- nas1982
+```
+
+```{r}
+df <- betaLB::nas1982
+```
+
+## Fit the regression model using the `lm()` function.
+
+```{r}
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+## Estimate the standardized regression slopes.
+
+`DiffBetaLB()` needs fully standardized slopes (`std_y = TRUE` and `std_x = NULL`).
+
+```{r}
+std <- BetaLB(object = object, type = "robust", alpha = c(0.05, 0.01))
+```
+
+## Differences of standardized slopes
+
+The likelihood intervals of the differences $\beta^{\ast}_{i} - \beta^{\ast}_{j}$
+are solved for every pair of regressors.
+
+```{r}
+diff <- DiffBetaLB(object = std, alpha = c(0.05, 0.01))
+summary(object = diff, alpha = 0.05)
+coef(object = diff)
+confint(object = diff, level = 0.99)
+```
+
+## References

@@ -1,0 +1,79 @@
+---
+title: "betaLB: Example Using the RSqLB Function"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @NationalResearchCouncil-1982
+vignette: >
+  %\VignetteIndexEntry{betaLB: Example Using the RSqLB Function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+
+```{r}
+#| message = FALSE
+library(package = betaLB)
+```
+
+```{r}
+#| echo = FALSE
+if (!exists(x = "nas1982")) {
+  try(
+    expr = utils::data(
+      "nas1982",
+      package = "betaLB"
+    ),
+    silent = TRUE
+  )
+}
+df <- nas1982
+```
+
+```{r}
+df <- betaLB::nas1982
+```
+
+## Fit the regression model using the `lm()` function.
+
+```{r}
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+## Estimate the standardized regression slopes.
+
+```{r}
+std <- BetaLB(object = object, type = "robust", alpha = 0.05)
+```
+
+## R-squared and adjusted R-squared
+
+The interval of R-squared is a profile likelihood interval for a nonnegative quantity
+that depends on all the standardized slopes (vector projection, conservative).
+The limits of adjusted R-squared are the transformed limits of R-squared,
+and the lower limit can be negative.
+
+```{r}
+rsq <- RSqLB(object = std, alpha = 0.05)
+summary(object = rsq)
+coef(object = rsq)
+confint(object = rsq, level = 0.95)
+```
+
+## References

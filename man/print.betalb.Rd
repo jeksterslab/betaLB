@@ -4,7 +4,7 @@
 \alias{print.betalb}
 \title{Print Method for an Object of Class \code{betalb}}
 \usage{
-\method{print}{betalb}(x, alpha = NULL, digits = 4, type = NULL, ...)
+\method{print}{betalb}(x, alpha = NULL, digits = 4, ...)
 }
 \arguments{
 \item{x}{Object of class \code{betalb}.}
@@ -12,26 +12,36 @@
 \item{alpha}{Numeric vector.
 Significance level \eqn{\alpha}.
 If \code{alpha = NULL},
-show all stored significance levels.}
+use the argument \code{alpha} used in \code{x}.}
 
 \item{digits}{Digits to print.}
 
-\item{type}{Stored calibration type; \code{NULL} selects all for printing.}
-
-\item{...}{Additional arguments.}
+\item{...}{additional arguments.}
 }
 \value{
-Prints a matrix of estimates and confidence intervals.
+Prints a matrix of
+standardized regression slopes,
+and the lower and upper limits of the likelihood intervals.
+Endpoints that the solver could not verify are reported below the matrix.
 }
 \description{
 Print Method for an Object of Class \code{betalb}
 }
 \examples{
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-print(x = object)
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
 
 }
 \author{

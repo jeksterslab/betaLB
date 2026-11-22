@@ -2,36 +2,89 @@
 % Please edit documentation in R/betaLB-r-sq-lb.R
 \name{RSqLB}
 \alias{RSqLB}
-\title{Likelihood Intervals for R-Squared and Its Finite-Sample Adjustment}
+\title{Estimate R-Squared and Adjusted R-Squared
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-RSqLB(object)
+RSqLB(object, alpha = c(0.05, 0.01, 0.001))
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object of class \code{eslb}
+which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{fit}{The argument \code{object}.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names.}
+\item{est}{Vector of R-squared and adjusted R-squared.}
+\item{intervals}{Data frame of the estimates and the limits
+of each significance level.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+\item{fun}{Function used ("RSqLB").}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate R-Squared and Adjusted R-Squared
+and the Corresponding Likelihood-Based Confidence Intervals
+}
+\details{
+Let \eqn{\boldsymbol{\beta}^{\ast}} be the vector of standardized slopes
+and \eqn{\boldsymbol{R}_{x}} the correlation matrix of the regressors.
+The R-squared and the adjusted R-squared are
+\deqn{R^{2} = \boldsymbol{\beta}^{\ast\prime} \boldsymbol{R}_{x}
+\boldsymbol{\beta}^{\ast}, \quad \bar{R}^{2} = 1 - \left( 1 - R^{2} \right)
+\frac{n - 1}{n - k},}
+where \eqn{n} is the sample size and \eqn{k} is the number of parameters
+in the regression model, including the intercept.
+The interval of \eqn{R^{2}} is the profile likelihood interval
+of a nonnegative quantity;
+the limits of \eqn{\bar{R}^{2}} are the transformed limits of
+\eqn{R^{2}}.
+The \code{type} and \code{control} stored in \code{object} are used.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "rsq", type = "mvn", alpha = 0.05)
-RSqLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# RSqLB --------------------------------------------------------------------
+out <- RSqLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
+summary(object = out)
+coef(object = out)
+confint(object = out, level = 0.95)
+
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=BetaLB]{BetaLB()}},
 \code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=FSqLB]{FSqLB()}},
 \code{\link[=PCorLB]{PCorLB()}},
-\code{\link[=SCorLB]{SCorLB()}}
+\code{\link[=SCorLB]{SCorLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{rsq}

@@ -2,36 +2,113 @@
 % Please edit documentation in R/betaLB-delta-r-sq-lb.R
 \name{DeltaRSqLB}
 \alias{DeltaRSqLB}
-\title{Likelihood Intervals for Increments in R-Squared}
+\title{Estimate Improvement in R-Squared
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-DeltaRSqLB(object)
+DeltaRSqLB(object, alpha = c(0.05, 0.01, 0.001), blocks = NULL)
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
+
+\item{blocks}{\code{NULL} or a named list of additional predictor blocks,
+given by regressor names or column indices.
+Each block adds an element named \verb{block:<name>} to the output.
+The default \code{NULL} gives one element per regressor.}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object of class \code{eslb}
+which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{fit}{The argument \code{object}.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names.}
+\item{est}{Vector of improvements in R-squared.}
+\item{intervals}{Data frame of the estimates and the limits
+of each significance level.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+\item{fun}{Function used ("DeltaRSqLB").}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate Improvement in R-Squared
+and the Corresponding Likelihood-Based Confidence Intervals
+}
+\details{
+The improvement in R-squared of regressor \eqn{j} is
+\eqn{sr^{2}_{j}}, the change in \eqn{R^{2}}
+when regressor \eqn{j} is added last.
+The intervals are profile likelihood intervals of a nonnegative quantity.
+With \code{blocks}, the improvement is that of a set of regressors;
+the intervals are conservative (vector projection).
+The \code{type} and \code{control} stored in \code{object} are used.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "deltarsq", type = "mvn", alpha = 0.05)
-DeltaRSqLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# DeltaRSqLB ---------------------------------------------------------------
+out <- DeltaRSqLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
+summary(object = out)
+coef(object = out)
+confint(object = out, level = 0.95)
+
+}
+\references{
+Algina, J., Keselman, H. J., & Penfield, R. D. (2007).
+Confidence intervals for an effect size measure
+in multiple linear regression.
+\emph{Educational and Psychological Measurement}, \emph{67}(2), 207--218.
+\doi{10.1177/0013164406292030}
+
+Algina, J., Keselman, H. J., & Penfield, R. D. (2008a).
+Confidence intervals for the squared multiple semipartial
+correlation coefficient.
+\emph{Journal of Modern Applied Statistical Methods}, \emph{7}(1), 2--10.
+\doi{10.22237/jmasm/1209614460}
+
+Algina, J., Keselman, H. J., & Penfield, R. D. (2008b).
+Note on a confidence interval for the squared semipartial
+correlation coefficient.
+\emph{Educational and Psychological Measurement}, \emph{68}(5), 734--741.
+\doi{10.1177/0013164407313371}
+
+Algina, J., Keselman, H. J., & Penfield, R. D. (2010).
+Confidence intervals for squared semipartial correlation coefficients:
+The effect of nonnormality.
+\emph{Educational and Psychological Measurement}, \emph{70}(6), 926--940.
+\doi{10.1177/0013164410379335}
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=BetaLB]{BetaLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=FSqLB]{FSqLB()}},
 \code{\link[=PCorLB]{PCorLB()}},
 \code{\link[=RSqLB]{RSqLB()}},
-\code{\link[=SCorLB]{SCorLB()}}
+\code{\link[=SCorLB]{SCorLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{deltarsq}

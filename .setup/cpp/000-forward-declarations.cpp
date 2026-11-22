@@ -65,6 +65,7 @@ Rcpp::List LBInspectCpp(const arma::vec& par, const arma::mat& sample,
                         const int family, const arma::uvec& index,
                         const arma::vec& std_x, const bool std_y,
                         const bool squared);
-arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword k);
+Rcpp::NumericVector Quantile(const arma::vec& x, const arma::vec& probs);
+arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword& k);
 Rcpp::List StrRegressionofVechSigmaMat(const arma::mat& vechsigmacap,
-                                       const arma::uword k);
+                                       const arma::uword& k);

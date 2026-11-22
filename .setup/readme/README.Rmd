@@ -3,9 +3,14 @@ title: "betaLB"
 author: "Ivan Jacob Agaloos Pesigan"
 date: "`r Sys.Date()`"
 output: github_document
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @RCoreTeam-2026
 ---
 
-<!-- README.md is generated from .setup/readme/README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -17,6 +22,16 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
+[![Make Project](https://github.com/jeksterslab/betaLB/actions/workflows/make.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/make.yml)
+[![R-CMD-check-standard](https://github.com/jeksterslab/betaLB/actions/workflows/check-standard.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/check-standard.yml)
+[![R-CMD-check-oldrel](https://github.com/jeksterslab/betaLB/actions/workflows/check-oldrel.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/check-oldrel.yml)
+[![R Package Test Coverage](https://github.com/jeksterslab/betaLB/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/test-coverage.yml)
+[![Lint R Package](https://github.com/jeksterslab/betaLB/actions/workflows/lint.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/lint.yml)
+[![Package Website (GitHub Pages)](https://github.com/jeksterslab/betaLB/actions/workflows/pkgdown-gh-pages.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/pkgdown-gh-pages.yml)
+[![Compile LaTeX](https://github.com/jeksterslab/betaLB/actions/workflows/latex.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/latex.yml)
+[![Shell Check](https://github.com/jeksterslab/betaLB/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/shellcheck.yml)
+[![pages-build-deployment](https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment)
+[![codecov](https://codecov.io/gh/jeksterslab/betaLB/branch/main/graph/badge.svg?token=KVLUET3DJ6)](https://codecov.io/gh/jeksterslab/betaLB)
 <!-- badges: end -->
 
 ## Description
@@ -27,6 +42,9 @@ including multiple correlation, semipartial correlations,
 improvement in R-squared, squared partial correlations,
 differences in standardized regression coefficients,
 and Cohen's f-squared, for models fitted by `lm()`.
+The intervals invert the Gaussian likelihood-ratio test
+of the covariance matrix of the outcome and the regressors,
+with a normal-theory or a robust (fourth-moment) cutoff.
 
 ## Installation
 
@@ -34,37 +52,98 @@ You can install the development version of `betaLB` from
 [GitHub](https://github.com/jeksterslab/betaLB) with:
 
 ```r
-if (!requireNamespace(package = "pak", quietly = TRUE)) {
-  utils::install.packages(pkgs = "pak")
+if (!require("pak")) install.packages("pak")
+pak::pkg_install("jeksterslab/betaLB")
+```
+
+## Example
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+Likelihood-based confidence intervals for the standardized regression coefficients are generated
+using the `BetaLB()` function from the `betaLB` package.
+
+```{r}
+#| message = FALSE
+library(package = betaLB)
+```
+
+```{r}
+#| echo = FALSE
+if (!exists(x = "nas1982")) {
+  try(
+    expr = utils::data(
+      "nas1982",
+      package = "betaLB"
+    ),
+    silent = TRUE
+  )
 }
-pak::pkg_install(pkg = "jeksterslab/betaLB")
+df <- nas1982
 ```
 
-## Likelihood intervals
-
-Fit once for the effect families, calibration types and confidence levels needed.
-Extractors select stored results without refitting.
-
-```{r likelihood-example}
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- betaLB::LB(
-  object = fit,
-  effects = c("beta", "rsq"),
-  type = c("mvn", "robust"),
-  alpha = c(0.05, 0.10)
-)
-betaLB::BetaLB(object = out)
-stats::confint(object = betaLB::RSqLB(object = out), type = "robust")
+```{r}
+df <- betaLB::nas1982
 ```
 
-Scalar targets use profile-likelihood regions.
-Multi-coefficient R-squared and block effects use conservative vector projection;
-the output identifies this calibration and its dimension.
-Robust calibration assumes independently sampled random regressors and finite
-fourth moments. It does not supply fixed-regressor or clustered-data inference.
+### Fit the regression model using the `lm()` function.
 
-`out$intervals` contains every computed band and its endpoint statuses.
-`out$diagnostics` retains numerical verification details.
+```{r}
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+### Estimate the standardized regression slopes and the corresponding likelihood-based confidence intervals.
+
+```{r}
+BetaLB(object = object, type = "mvn", alpha = 0.05)
+```
+
+## Other Features
+
+The package provides the following functions.
+
+| Function | Purpose |
+|---|---|
+| `BetaLB()` | Standardized regression coefficients with normal-theory (`type = "mvn"`) or robust (`type = "robust"`) likelihood intervals |
+| `RSqLB()` | R-squared and adjusted R-squared |
+| `DiffBetaLB()` | Differences of standardized regression coefficients |
+| `SCorLB()` | Semipartial correlations |
+| `SCorSqLB()` | Squared semipartial correlations (squared signed interval) |
+| `PCorLB()` | Squared partial correlations |
+| `DeltaRSqLB()` | Improvement in R-squared |
+| `FSqLB()` | Cohen's f-squared and local f-squared |
+
+The `coef()`, `confint()`, `summary()`, and `print()` methods
+are available for the returned objects.
+The effect-size functions take the output of `BetaLB()`
+and use its `type` and `control`.
+Scalar targets use profile-likelihood regions;
+multi-coefficient targets use a conservative vector projection,
+and the output names the calibration and its dimension.
 An unverified endpoint is `NA`; no Wald endpoint is substituted.
-Adjusted R-squared is an explicitly sample-size-dependent transformation,
-and its interval can have a negative lower bound.
+Robust calibration assumes independently sampled random regressors
+and finite fourth moments.
+Examples for each function are in the package vignettes.
+
+## Effect Sizes
+
+The definitions, formulas, and notes on the intervals
+are in the help pages of the functions
+and in the vignette
+[betaLB: Example Using the Effect Size Functions](https://jeksterslab.github.io/betaLB/articles/example-es-lb.html).
+
+## Documentation
+
+See
+[GitHub Pages](https://jeksterslab.github.io/betaLB/index.html)
+for package documentation.
+
+## Citation
+
+To cite `betaLB` in publications, please run `citation("betaLB")`.
+
+## References

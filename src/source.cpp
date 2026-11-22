@@ -65,9 +65,10 @@ Rcpp::List LBInspectCpp(const arma::vec& par, const arma::mat& sample,
                         const int family, const arma::uvec& index,
                         const arma::vec& std_x, const bool std_y,
                         const bool squared);
-arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword k);
+Rcpp::NumericVector Quantile(const arma::vec& x, const arma::vec& probs);
+arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword& k);
 Rcpp::List StrRegressionofVechSigmaMat(const arma::mat& vechsigmacap,
-                                       const arma::uword k);
+                                       const arma::uword& k);
 // -----------------------------------------------------------------------------
 // edit .setup/cpp/betaLB-lb-batch-dot.cpp
 // Ivan Jacob Agaloos Pesigan
@@ -873,17 +874,32 @@ LBEndpoint LBSolve(const arma::mat& starts, const arma::mat& sample,
   return best;
 }
 // -----------------------------------------------------------------------------
-// edit functionsCpp/linearAlgebra/linearAlgebra-sym-of-vech-dot.cpp
-// (linked into .setup/cpp/; change it in the functionsCpp project)
+// edit .setup/cpp/linearAlgebra-sym-of-vech-dot.cpp
 // Ivan Jacob Agaloos Pesigan
 // -----------------------------------------------------------------------------
 
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
-// Symmetric k x k matrix from its half-vectorization
-// (lower triangle, column by column, as .Vech() in R).
-arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword k) {
+//' Symmetric Matrix from Its Half-Vectorization (C++)
+//'
+//' Builds the symmetric \eqn{k \times k} matrix
+//' from its half-vectorization
+//' (the lower triangle, column by column, as `.Vech()` in R).
+//' Called from other C++ functions; not exported to R.
+//'
+//' @author Ivan Jacob Agaloos Pesigan
+//'
+//' @param x Numeric row vector of length \eqn{k (k + 1) / 2}.
+//' @param k Positive integer. Dimension of the matrix.
+//'
+//' @return Numeric \eqn{k \times k} symmetric matrix.
+//'
+//' @examples
+//' # C++ only: SymofVechCpp(x = vech_row, k = 3)
+//'
+//' @noRd
+arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword& k) {
   arma::mat out(k, k);
   arma::uword idx = 0;
   for (arma::uword j = 0; j < k; j++) {
@@ -895,43 +911,109 @@ arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword k) {
   }
   return out;
 }
-
-// Half-vectorization of a square matrix
-// (lower triangle, column by column, as .Vech() in R).
-arma::rowvec VechCpp(const arma::mat& x) {
-  const arma::uword k = x.n_rows;
-  arma::rowvec out(k * (k + 1) / 2);
-  arma::uword idx = 0;
-  for (arma::uword j = 0; j < k; j++) {
-    for (arma::uword i = j; i < k; i++) {
-      out(idx) = x(i, j);
-      idx++;
-    }
-  }
-  return out;
-}
 // -----------------------------------------------------------------------------
-// edit
-// functions/strRegression/strRegression-str-regression-of-vech-sigma-mat-dot.cpp
-// (linked into .setup/cpp/; change it in the functionsCpp project)
+// edit .setup/cpp/nBootstrap-quantile-dot.cpp
 // Ivan Jacob Agaloos Pesigan
 // -----------------------------------------------------------------------------
 
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
-arma::mat SymofVechCpp(const arma::rowvec& x, const arma::uword k);
+//' Sample Quantiles, Type 7 (C++)
+//'
+//' Returns the sample quantiles of `x` at `probs`
+//' with the same arithmetic as `stats::quantile(type = 7)`:
+//' with \eqn{h = 1 + (n - 1) p}, \eqn{l = \lfloor h \rfloor},
+//' and \eqn{u = \lceil h \rceil},
+//' the quantile is \eqn{(1 - (h - l)) x_{(l)} + (h - l) x_{(u)}},
+//' or \eqn{x_{(l)}} when \eqn{h = l} or \eqn{x_{(u)} = x_{(l)}}.
+//' `x` has no missing values (the callers drop them).
+//' An empty `x` gives `NA`, as in R;
+//' a probability outside \eqn{\left[ 0, 1 \right]} or missing stops.
+//'
+//' @author Ivan Jacob Agaloos Pesigan
+//'
+//' @param x Numeric vector.
+//'   Draws, without missing values.
+//' @param probs Numeric vector.
+//'   Probabilities.
+//'
+//' @return Numeric vector of the length of `probs`.
+//'
+//' @examples
+//' .Quantile(x = c(3, 1, 2, 5), probs = c(0.025, 0.5, 0.975))
+//'
+//' @noRd
+// [[Rcpp::export(.Quantile)]]
+Rcpp::NumericVector Quantile(const arma::vec& x, const arma::vec& probs) {
+  const arma::vec xs = arma::sort(x);
+  const arma::uword n = xs.n_elem;
+  Rcpp::NumericVector out(probs.n_elem, NA_REAL);
+  if (n == 0) {
+    return out;
+  }
+  const double nm1 = static_cast<double>(n - 1);
+  for (arma::uword i = 0; i < probs.n_elem; i++) {
+    if (!(probs(i) >= 0.0 && probs(i) <= 1.0)) {
+      Rcpp::stop("probabilities must be in [0, 1].");
+    }
+    // 1-based index as in R
+    const double index = 1.0 + nm1 * probs(i);
+    const double lo = std::floor(index);
+    const double hi = std::ceil(index);
+    const double qs = xs(static_cast<arma::uword>(lo) - 1);
+    const double xhi = xs(static_cast<arma::uword>(hi) - 1);
+    if (index > lo && xhi != qs) {
+      const double h = index - lo;
+      out[i] = (1.0 - h) * qs + h * xhi;
+    } else {
+      out[i] = qs;
+    }
+  }
+  return out;
+}
+// -----------------------------------------------------------------------------
+// edit .setup/cpp/strRegression-str-regression-of-vech-sigma-mat-dot.cpp
+// Ivan Jacob Agaloos Pesigan
+// -----------------------------------------------------------------------------
 
-// Regression effect sizes for each row of vech(sigmacap),
-// where sigmacap is the covariance matrix of (y, x_1, ..., x_p):
-// standardized slopes (betastar), R-squared (rsq),
-// semipartial correlations (spcor),
-// and squared partial correlations (pcorsq).
-// Same quantities as .BetaStarofSigma(), .RSqofSigma(), .SPCor(),
-// and .PCorSq() in R. Rows that fail are NA.
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+
+//' Regression Effect Sizes of Draws of the Covariance Matrix (C++)
+//'
+//' Regression effect sizes for each row of
+//' \eqn{\operatorname{vech} \left( \boldsymbol{\Sigma} \right)},
+//' where \eqn{\boldsymbol{\Sigma}} is the covariance matrix of
+//' \eqn{\left( y, x_{1}, \dots, x_{p} \right)}:
+//' standardized slopes (`betastar`), R-squared (`rsq`),
+//' semipartial correlations (`spcor`),
+//' and squared partial correlations (`pcorsq`).
+//' Same quantities as `.BetaStarofSigma()`, `.RSqofSigma()`, `.SPCor()`,
+//' and `.PCorSq()` in R.
+//' Rows that fail (a nonpositive variance or a singular matrix) are `NA`.
+//'
+//' @author Ivan Jacob Agaloos Pesigan
+//'
+//' @param vechsigmacap Numeric matrix.
+//'   Each row is the half-vectorization of a covariance matrix
+//'   with `k * (k + 1) / 2` columns.
+//' @param k Positive integer.
+//'   Number of variables, \eqn{p + 1}.
+//'
+//' @return A list with the matrix `betastar` (`n` by `p`),
+//'   the vector `rsq` (length `n`),
+//'   and the matrices `spcor` and `pcorsq` (`n` by `p`).
+//'
+//' @examples
+//' sigmacap <- matrix(data = c(4, 1, 1, 1, 9, 2, 1, 2, 16), nrow = 3)
+//' vechsigmacap <- rbind(sigmacap[lower.tri(x = sigmacap, diag = TRUE)])
+//' .StrRegressionofVechSigmaMat(vechsigmacap = vechsigmacap, k = 3)
+//'
+//' @noRd
 // [[Rcpp::export(.StrRegressionofVechSigmaMat)]]
 Rcpp::List StrRegressionofVechSigmaMat(const arma::mat& vechsigmacap,
-                                       const arma::uword k) {
+                                       const arma::uword& k) {
   const arma::uword n = vechsigmacap.n_rows;
   const arma::uword p = k - 1;
   arma::mat betastar(n, p);

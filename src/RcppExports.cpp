@@ -46,14 +46,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Quantile
+Rcpp::NumericVector Quantile(const arma::vec& x, const arma::vec& probs);
+RcppExport SEXP _betaLB_Quantile(SEXP xSEXP, SEXP probsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type probs(probsSEXP);
+    rcpp_result_gen = Rcpp::wrap(Quantile(x, probs));
+    return rcpp_result_gen;
+END_RCPP
+}
 // StrRegressionofVechSigmaMat
-Rcpp::List StrRegressionofVechSigmaMat(const arma::mat& vechsigmacap, const arma::uword k);
+Rcpp::List StrRegressionofVechSigmaMat(const arma::mat& vechsigmacap, const arma::uword& k);
 RcppExport SEXP _betaLB_StrRegressionofVechSigmaMat(SEXP vechsigmacapSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type vechsigmacap(vechsigmacapSEXP);
-    Rcpp::traits::input_parameter< const arma::uword >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(StrRegressionofVechSigmaMat(vechsigmacap, k));
     return rcpp_result_gen;
 END_RCPP
@@ -62,6 +74,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_betaLB_LBBatchCpp", (DL_FUNC) &_betaLB_LBBatchCpp, 6},
     {"_betaLB_LBInspectCpp", (DL_FUNC) &_betaLB_LBInspectCpp, 9},
+    {"_betaLB_Quantile", (DL_FUNC) &_betaLB_Quantile, 2},
     {"_betaLB_StrRegressionofVechSigmaMat", (DL_FUNC) &_betaLB_StrRegressionofVechSigmaMat, 2},
     {NULL, NULL, 0}
 };

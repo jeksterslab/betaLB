@@ -2,36 +2,82 @@
 % Please edit documentation in R/betaLB-s-cor-lb.R
 \name{SCorLB}
 \alias{SCorLB}
-\title{Likelihood Intervals for Signed Semipartial Correlations}
+\title{Estimate Semipartial Correlation Coefficients
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-SCorLB(object)
+SCorLB(object, alpha = c(0.05, 0.01, 0.001))
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object of class \code{eslb}
+which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{fit}{The argument \code{object}.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names.}
+\item{est}{Vector of semipartial correlations.}
+\item{intervals}{Data frame of the estimates and the limits
+of each significance level.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+\item{fun}{Function used ("SCorLB").}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate Semipartial Correlation Coefficients
+and the Corresponding Likelihood-Based Confidence Intervals
+}
+\details{
+The semipartial correlation of regressor \eqn{j} is
+\eqn{sr_{j} = \beta^{\ast}_{j} \sqrt{1 - R^{2}_{j \cdot -j}}},
+where \eqn{R^{2}_{j \cdot -j}} is the R-squared from regressing regressor
+\eqn{j} on the other regressors.
+The intervals are signed profile likelihood intervals of a scalar.
+The \code{type} and \code{control} stored in \code{object} are used.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "scor", type = "mvn", alpha = 0.05)
-SCorLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# SCorLB -------------------------------------------------------------------
+out <- SCorLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
+summary(object = out)
+coef(object = out)
+confint(object = out, level = 0.95)
+
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=BetaLB]{BetaLB()}},
 \code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=FSqLB]{FSqLB()}},
 \code{\link[=PCorLB]{PCorLB()}},
-\code{\link[=RSqLB]{RSqLB()}}
+\code{\link[=RSqLB]{RSqLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{scor}

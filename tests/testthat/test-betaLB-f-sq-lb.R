@@ -4,8 +4,14 @@ lapply(X = 1, FUN = function(i, text) {
   testthat::test_that(
     desc = paste(text, "preserves the regression estimand"),
     code = {
-      out <- betaLB::FSqLB(object = .LBFixture())
-      fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+      out <- betaLB::FSqLB(
+        object = .LBFixture(), alpha = 0.05,
+        blocks = list(both = c("NARTIC", "PCTGRT"))
+      )
+      fit <- stats::lm(
+        formula = QUALITY ~ NARTIC + PCTGRT,
+        data = betaLB::nas1982
+      )
       r2 <- summary(object = fit)$r.squared
       t_stat <- summary(object = fit)$coefficients[-1L, "t value"]
       expected <- c(
@@ -16,7 +22,8 @@ lapply(X = 1, FUN = function(i, text) {
         object = stats::coef(object = out), expected = expected
       )
       ci <- stats::confint(
-        object = betaLB::RSqLB(object = .LBFixture()), parm = "rsq"
+        object = betaLB::RSqLB(object = .LBFixture(), alpha = 0.05),
+        parm = "rsq"
       )
       testthat::expect_equal(
         object = unname(obj = stats::confint(

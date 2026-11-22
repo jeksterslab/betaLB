@@ -6,7 +6,10 @@ lapply(X = 1, FUN = function(i, text) {
     desc = paste(text, "agrees with independent R endpoints"),
     code = {
       d <- betaLB:::.LBData(
-        object = stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+        object = stats::lm(
+          formula = QUALITY ~ NARTIC + PCTGRT,
+          data = betaLB::nas1982
+        )
       )
       for (family in c(
         "beta", "diff", "sr", "pr", "local_f",

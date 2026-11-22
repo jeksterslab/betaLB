@@ -1,0 +1,119 @@
+---
+title: "betaLB: Example Using the Effect Size Functions"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @NationalResearchCouncil-1982
+vignette: >
+  %\VignetteIndexEntry{betaLB: Example Using the Effect Size Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+
+```{r}
+#| message = FALSE
+library(package = betaLB)
+```
+
+```{r}
+#| echo = FALSE
+if (!exists(x = "nas1982")) {
+  try(
+    expr = utils::data(
+      "nas1982",
+      package = "betaLB"
+    ),
+    silent = TRUE
+  )
+}
+df <- nas1982
+```
+
+```{r}
+df <- betaLB::nas1982
+```
+
+## Fit the regression model using the `lm()` function.
+
+```{r}
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+## Estimate the standardized regression slopes.
+
+The effect size functions take the output of `BetaLB()`
+and use its `type` and `control`.
+
+```{r}
+std <- BetaLB(object = object, type = "robust", alpha = 0.05)
+```
+
+## Semipartial correlations
+
+```{r}
+summary(object = SCorLB(object = std, alpha = 0.05))
+```
+
+## Squared semipartial correlations
+
+The `SCorSqLB()` function squares the signed-semipartial interval as a set.
+If the signed interval contains zero,
+the lower limit of the squared interval is zero.
+
+```{r}
+SCorSqLB(object = std, level = 0.95)
+```
+
+## Squared partial correlations
+
+```{r}
+summary(object = PCorLB(object = std, alpha = 0.05))
+```
+
+## Improvement in R-squared
+
+The improvement in R-squared of regressor $j$ is $sr^{2}_{j}$.
+The `blocks` argument gives the improvement of a set of regressors.
+
+```{r}
+summary(
+  object = DeltaRSqLB(
+    object = std,
+    alpha = 0.05,
+    blocks = list(grants = c("PCTGRT", "PCTSUPP"))
+  )
+)
+```
+
+## Cohen's f-squared and local f-squared
+
+```{r}
+summary(object = FSqLB(object = std, alpha = 0.05))
+```
+
+## Extracting estimates and confidence intervals
+
+```{r}
+scor <- SCorLB(object = std, alpha = 0.05)
+stats::coef(object = scor)
+stats::confint(object = scor, level = 0.95)
+```
+
+## References

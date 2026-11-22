@@ -2,35 +2,74 @@
 % Please edit documentation in R/betaLB-s-cor-sq-lb.R
 \name{SCorSqLB}
 \alias{SCorSqLB}
-\title{Squared Signed-Semipartial Confidence Intervals}
+\title{Estimate Squared Semipartial Correlation Coefficients
+and the Corresponding Confidence Intervals
+From the Signed Intervals}
 \usage{
-SCorSqLB(object, level = 0.95, type = NULL)
+SCorSqLB(object, level = 0.95)
 }
 \arguments{
-\item{object}{Context accepted by \code{\link[=SCorLB]{SCorLB()}}.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
 
 \item{level}{Single confidence level in (0, 1).}
-
-\item{type}{Stored likelihood calibration, or NULL for the first.}
 }
 \value{
 Data frame with est, lower and upper columns and predictor
-row names. The point estimate is the squared signed estimate.
+row names.
+The point estimate is the squared signed estimate.
 No standard error is implied by this interval transformation.
 }
 \description{
 Square the signed interval as a set, with lower limit zero if it
-contains zero. This differs from an interval of squared draws.
+contains zero.
+This differs from an interval of squared draws.
 No draws are generated and no endpoints are clipped to one.
 Failed signed endpoints remain missing.
 }
+\details{
+The semipartial correlation \eqn{sr_{j}} (see \code{\link[=SCorLB]{SCorLB()}}) is signed,
+and its confidence interval \eqn{\left[ l, u \right]} may contain zero.
+The interval for \eqn{sr^{2}_{j}} is the image of that interval under
+squaring.
+The squared interval is
+\eqn{\left[ l^{2}, u^{2} \right]} if \eqn{0 < l},
+\eqn{\left[ u^{2}, l^{2} \right]} if \eqn{u < 0},
+and \eqn{\left[ 0, \max \left( l^{2}, u^{2} \right) \right]}
+if the signed interval contains zero.
+This is not a likelihood interval for \eqn{sr^{2}_{j}},
+and it is not an interval for \code{\link[=DeltaRSqLB]{DeltaRSqLB()}}.
+}
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "scor", type = "mvn", alpha = 0.05)
-SCorSqLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# SCorSqLB -----------------------------------------------------------------
+SCorSqLB(object = std, level = 0.95)
+
+}
+\seealso{
+Other Beta Likelihood-Based Functions:
+\code{\link[=BetaLB]{BetaLB()}},
+\code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
+\code{\link[=DiffBetaLB]{DiffBetaLB()}},
+\code{\link[=FSqLB]{FSqLB()}},
+\code{\link[=PCorLB]{PCorLB()}},
+\code{\link[=RSqLB]{RSqLB()}},
+\code{\link[=SCorLB]{SCorLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
+\concept{Beta Likelihood-Based Functions}
 \keyword{betaLB}
 \keyword{scor}

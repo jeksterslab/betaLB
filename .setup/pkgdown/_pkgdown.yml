@@ -5,19 +5,23 @@ template:
   package: rProject
 
 reference:
-- title: Likelihood Engine
+- title: Standardized Regression Coefficients
   contents:
-  - LB
-- title: Effect Sizes
+  - has_keyword("std")
+- title: R-Squared
   contents:
-  - BetaLB
-  - RSqLB
-  - SCorLB
-  - SCorSqLB
-  - PCorLB
-  - DeltaRSqLB
-  - DiffBetaLB
-  - FSqLB
+  - has_keyword("rsq")
+- title: Semipartial and Squared Partial Correlations
+  contents:
+  - has_keyword("scor")
+  - has_keyword("pcor")
+- title: Improvement in R-Squared and Cohen's f-Squared
+  contents:
+  - has_keyword("deltarsq")
+  - has_keyword("fsq")
+- title: Differences of Standardized Regression Coefficients
+  contents:
+  - has_keyword("diff")
 - title: Methods
   contents:
   - has_keyword("methods")
@@ -26,6 +30,12 @@ reference:
   - has_keyword("data")
 
 articles:
+- title: Examples
+  contents:
+  - example-beta-lb
+  - example-diff-beta-lb
+  - example-r-sq-lb
+  - example-es-lb
 - title: Session Information
   contents:
   - session

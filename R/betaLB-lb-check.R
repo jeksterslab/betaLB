@@ -10,7 +10,7 @@
 #'
 #' @return Invisible `TRUE` when checks pass.
 #'
-#' @family Beta Profile Likelihood Functions
+#' @family Beta Likelihood-Based Functions
 #' @keywords betaLB internal
 #' @examples
 #' object <- structure(list(lm_process = list(p = 2)), class = "betalb")

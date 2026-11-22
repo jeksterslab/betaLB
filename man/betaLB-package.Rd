@@ -6,7 +6,46 @@
 \alias{betaLB-package}
 \title{betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes}
 \description{
-Generates profile likelihood confidence intervals for standardized regression coefficients (beta) and other effect sizes, including multiple correlation, semipartial correlations, improvement in R-squared, squared partial correlations, differences in standardized regression coefficients, and Cohen's f-squared, for models fitted by lm().
+Generates profile likelihood confidence intervals
+for standardized regression coefficients
+and other effect sizes
+for models fitted by \code{\link[stats:lm]{stats::lm()}}
+with independently sampled random regressors.
+The functions and arguments follow the \code{betaSandwich} package.
+}
+\section{Standardized regression coefficients}{
+
+\code{\link[=BetaLB]{BetaLB()}} estimates the standardized regression coefficients
+and their likelihood intervals.
+The argument \code{type} is \code{"mvn"} (multivariate normal theory)
+or \code{"robust"} (empirical fourth moments).
+}
+
+\section{Functions of the standardized coefficients}{
+
+\code{\link[=RSqLB]{RSqLB()}} (R-squared and adjusted R-squared),
+\code{\link[=DiffBetaLB]{DiffBetaLB()}} (differences of standardized slopes),
+\code{\link[=SCorLB]{SCorLB()}} and \code{\link[=SCorSqLB]{SCorSqLB()}} (semipartial correlations),
+\code{\link[=PCorLB]{PCorLB()}} (squared partial correlations),
+\code{\link[=DeltaRSqLB]{DeltaRSqLB()}} (improvement in R-squared), and
+\code{\link[=FSqLB]{FSqLB()}} (Cohen's f-squared and local f-squared).
+These functions take the output of \code{\link[=BetaLB]{BetaLB()}}.
+}
+
+\section{Methods}{
+
+The \code{coef()}, \code{confint()}, \code{summary()}, and \code{print()} methods are
+available for objects of class \code{betalb} and \code{eslb}.
+A covariance matrix is not defined for likelihood intervals,
+so \code{vcov()} stops with a message.
+}
+
+\references{
+Dudgeon, P. (2017).
+Some improvements in confidence intervals for standardized regression
+coefficients.
+\emph{Psychometrika}, \emph{82}(4), 928--951.
+\doi{10.1007/s11336-017-9563-z}
 }
 \seealso{
 Useful links:

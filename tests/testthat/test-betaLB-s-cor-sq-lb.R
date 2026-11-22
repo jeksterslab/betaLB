@@ -7,11 +7,12 @@ lapply(
       desc = paste(text, "projects the actual signed interval without draws"),
       code = {
         set.seed(seed = 713)
-        fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-        context <- LB(
-          object = fit, effects = "scor", type = "mvn", alpha = 0.05
+        fit <- stats::lm(
+          formula = QUALITY ~ NARTIC + PCTGRT,
+          data = betaLB::nas1982
         )
-        signed <- SCorLB(object = context)
+        context <- BetaLB(object = fit, type = "mvn", alpha = 0.05)
+        signed <- SCorLB(object = context, alpha = 0.05)
         ci <- stats::confint(object = signed, level = 0.95)
         seed <- .Random.seed
         out <- SCorSqLB(object = context)
