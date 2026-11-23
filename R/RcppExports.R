@@ -125,7 +125,7 @@ NULL
 #' # Called by LB() after input validation and calibration.
 #' @noRd
 .LBBatchCpp <- function(sample, units, n, requests, tolerance, maxeval) {
-    .Call('_betaLB_LBBatchCpp', PACKAGE = 'betaLB', sample, units, n, requests, tolerance, maxeval)
+    .Call(`_betaLB_LBBatchCpp`, sample, units, n, requests, tolerance, maxeval)
 }
 
 #' Inspect Native Likelihood Algebra for Independent Tests
@@ -146,7 +146,7 @@ NULL
 #' # See test-betaLB-native.R for independent R comparisons.
 #' @noRd
 .LBInspectCpp <- function(par, sample, units, n, family, index, std_x, std_y, squared) {
-    .Call('_betaLB_LBInspectCpp', PACKAGE = 'betaLB', par, sample, units, n, family, index, std_x, std_y, squared)
+    .Call(`_betaLB_LBInspectCpp`, par, sample, units, n, family, index, std_x, std_y, squared)
 }
 
 #' Sample Quantiles, Type 7 (C++)
@@ -175,7 +175,7 @@ NULL
 #'
 #' @noRd
 .Quantile <- function(x, probs) {
-    .Call('_betaLB_Quantile', PACKAGE = 'betaLB', x, probs)
+    .Call(`_betaLB_Quantile`, x, probs)
 }
 
 #' Regression Effect Sizes of Draws of the Covariance Matrix (C++)
@@ -210,6 +210,6 @@ NULL
 #'
 #' @noRd
 .StrRegressionofVechSigmaMat <- function(vechsigmacap, k) {
-    .Call('_betaLB_StrRegressionofVechSigmaMat', PACKAGE = 'betaLB', vechsigmacap, k)
+    .Call(`_betaLB_StrRegressionofVechSigmaMat`, vechsigmacap, k)
 }
 

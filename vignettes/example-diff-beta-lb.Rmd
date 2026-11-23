@@ -1,0 +1,80 @@
+---
+title: "betaLB: Example Using the DiffBetaLB Function"
+author: "Ivan Jacob Agaloos Pesigan"
+output: rmarkdown::html_vignette
+bibliography: "vignettes.bib"
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
+nocite: |
+  @Dudgeon-2017
+  @NationalResearchCouncil-1982
+vignette: >
+  %\VignetteIndexEntry{betaLB: Example Using the DiffBetaLB Function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+In this example, a multiple regression model is fitted
+using program quality ratings (`QUALITY`) as the regressand/outcome variable
+and number of published articles attributed to the program faculty members (`NARTIC`),
+percent of faculty members holding research grants (`PCTGRT`), and
+percentage of program graduates who received support (`PCTSUPP`) as regressor/predictor variables
+using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA [@NationalResearchCouncil-1982].
+
+
+``` r
+library(package = betaLB)
+```
+
+
+
+
+``` r
+df <- betaLB::nas1982
+```
+
+## Fit the regression model using the `lm()` function.
+
+
+``` r
+object <- stats::lm(formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP, data = df)
+```
+
+## Estimate the standardized regression slopes.
+
+`DiffBetaLB()` needs fully standardized slopes (`std_y = TRUE` and `std_x = NULL`).
+
+
+``` r
+std <- BetaLB(object = object, type = "robust", alpha = c(0.05, 0.01))
+```
+
+## Differences of standardized slopes
+
+The likelihood intervals of the differences $\beta^{\ast}_{i} - \beta^{\ast}_{j}$
+are solved for every pair of regressors.
+
+
+``` r
+diff <- DiffBetaLB(object = std, alpha = c(0.05, 0.01))
+summary(object = diff, alpha = 0.05)
+#> Call:
+#> DiffBetaLB(object = std, alpha = c(0.05, 0.01))
+#> 
+#> Differences of standardized regression slopes with ROBUST likelihood intervals:
+#>                     est    2.5%  97.5%
+#> NARTIC - PCTGRT  0.1037 -0.1345 0.3358
+#> NARTIC - PCTSUPP 0.2319 -0.0040 0.4557
+#> PCTGRT - PCTSUPP 0.1282 -0.1118 0.3623
+coef(object = diff)
+#>  NARTIC - PCTGRT NARTIC - PCTSUPP PCTGRT - PCTSUPP 
+#>        0.1036564        0.2318974        0.1282410
+confint(object = diff, level = 0.99)
+#>                        0.5 %    99.5 %
+#> NARTIC - PCTGRT  -0.21026750 0.4074141
+#> NARTIC - PCTSUPP -0.08126166 0.5244509
+#> PCTGRT - PCTSUPP -0.18999595 0.4361053
+```
+
+## References
