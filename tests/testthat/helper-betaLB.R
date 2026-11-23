@@ -1,24 +1,27 @@
 # Shared test helpers (testthat sources helper-*.R before the tests).
 # rProject writes this file once; it is yours after that.
-#' Reuse One Small Batched Test Fit
+#' Reuse Small Test Fits
 #'
-#' Avoid repeatedly solving the same fixture in extractor tests.
+#' Avoid repeatedly solving the same fixture in effect size tests.
 #' @author Ivan Jacob Agaloos Pesigan
-#' @return An LB context with two predictors, types and confidence levels.
+#' @param type Calibration type.
+#' @return A `betalb` object with two predictors and two confidence levels.
 #' @examples
 #' .LBFixture()
 #' @noRd
 .LBFixture <- local(expr = {
-  cache <- NULL
-  function() {
-    if (is.null(x = cache)) {
-      cache <<- betaLB::LB(
-        object = stats::lm(formula = mpg ~ wt + hp, data = mtcars),
-        type = c("mvn", "robust"), alpha = c(0.05, 0.10),
-        blocks = list(both = c("wt", "hp"))
+  cache <- list()
+  function(type = "mvn") {
+    if (is.null(x = cache[[type]])) {
+      cache[[type]] <<- betaLB::BetaLB(
+        object = stats::lm(
+          formula = QUALITY ~ NARTIC + PCTGRT,
+          data = betaLB::nas1982
+        ),
+        type = type, alpha = c(0.05, 0.10)
       )
     }
-    cache
+    cache[[type]]
   }
 })
 # Slow tests: run on CI and on request, skipped in local builds and on CRAN.

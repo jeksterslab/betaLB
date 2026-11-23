@@ -2,36 +2,170 @@
 % Please edit documentation in R/betaLB-beta-lb.R
 \name{BetaLB}
 \alias{BetaLB}
-\title{Likelihood Intervals for Standardized Regression Slopes}
+\title{Estimate Standardized Regression Coefficients
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-BetaLB(object)
+BetaLB(
+  object,
+  type = "mvn",
+  alpha = c(0.05, 0.01, 0.001),
+  std_y = TRUE,
+  std_x = NULL,
+  control = list()
+)
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{lm}.
+Unweighted, full-rank, scalar-response fit with an intercept,
+a stored model frame, no offsets, and a positive residual variance.}
+
+\item{type}{Character string.
+Calibration of the likelihood-ratio cutoff.
+\code{"mvn"} (default) assumes multivariate normality.
+\code{"robust"} uses the empirical fourth moments.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
+
+\item{std_y}{Logical.
+Standardize \eqn{y}.
+With \code{std_y = FALSE}, \eqn{y} is left in its original units
+(\eqn{b_j \sigma_{x_j}}).}
+
+\item{std_x}{Character vector or \code{NULL}.
+Names of the regressors to standardize.
+\code{NULL} (default) standardizes all regressors;
+\code{character(0)} standardizes none (\eqn{b_j / \sigma_y}).
+Leaving a dummy variable out keeps its 0-1 contrast.}
+
+\item{control}{Named list.
+\code{maxeval} is the evaluation budget per endpoint
+(default \code{10000L});
+\code{tolerance} is the normalized verification tolerance
+(default \code{1e-8}).}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object
+of class \code{betalb} which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names of the \code{lm} object.}
+\item{data}{Sample covariance matrix, units, and the estimated
+asymptotic covariance matrices of its elements.}
+\item{est}{Vector of standardized slopes.}
+\item{intervals}{Data frame with one row per slope and significance
+level: the estimate, the lower and upper limits,
+the status of each endpoint, and the calibration used.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimates the standardized regression coefficients
+and their profile likelihood confidence intervals
+for independently sampled random regressors.
+}
+\details{
+Partition the covariance matrix of the outcome and the regressors as
+\deqn{\boldsymbol{\Sigma} = \begin{pmatrix} \sigma^{2}_{y} &
+\boldsymbol{\sigma}_{yx}^{\prime} \\ \boldsymbol{\sigma}_{yx} &
+\boldsymbol{\Sigma}_{x} \end{pmatrix}.}
+The standardized regression slopes are
+\deqn{\beta^{\ast}_{j} = \beta_{j} \frac{\sigma_{x_{j}}}{\sigma_{y}},
+\quad \boldsymbol{\beta} = \boldsymbol{\Sigma}_{x}^{-1}
+\boldsymbol{\sigma}_{yx}.}
+Let \eqn{\tilde{\boldsymbol{S}}} be the sample covariance matrix with
+divisor \eqn{n}, \eqn{q} the number of variables, and
+\deqn{F \left( \boldsymbol{\Sigma} \right) = n \left[ \log \left|
+\boldsymbol{\Sigma} \right| - \log \left| \tilde{\boldsymbol{S}} \right| +
+\operatorname{tr} \left( \tilde{\boldsymbol{S}} \boldsymbol{\Sigma}^{-1}
+\right) - q \right]}
+the Gaussian likelihood-ratio statistic of \eqn{\boldsymbol{\Sigma}}
+against \eqn{\tilde{\boldsymbol{S}}}.
+For a target \eqn{\theta = g \left( \boldsymbol{\Sigma} \right)},
+here \eqn{\beta^{\ast}_{j}},
+the \eqn{100 \left( 1 - \alpha \right) \%} interval is
+\deqn{\left\{ \theta_{0} : \min_{\boldsymbol{\Sigma} : g \left(
+\boldsymbol{\Sigma} \right) = \theta_{0}} F \left( \boldsymbol{\Sigma}
+\right) \leq c \, \chi^{2}_{1, 1 - \alpha} \right\}.}
+With \code{type = "mvn"}, \eqn{c = 1}.
+With \code{type = "robust"},
+\deqn{c = \frac{\boldsymbol{b}^{\prime}
+\hat{\boldsymbol{\Gamma}}_{\mathrm{ADF}}
+\boldsymbol{b}}{\boldsymbol{b}^{\prime}
+\hat{\boldsymbol{\Gamma}}_{\mathrm{N}} \boldsymbol{b}},
+\quad \boldsymbol{b} =
+\frac{\partial g}{\partial \operatorname{vech} \left( \boldsymbol{\Sigma}
+\right)},}
+evaluated at \eqn{\tilde{\boldsymbol{S}}}, where
+\eqn{\hat{\boldsymbol{\Gamma}}_{\mathrm{N}}} and
+\eqn{\hat{\boldsymbol{\Gamma}}_{\mathrm{ADF}}} are the normal-theory and
+the fourth-moment estimates of the asymptotic covariance matrix of
+\eqn{\sqrt{n} \operatorname{vech} \left( \tilde{\boldsymbol{S}} \right)}.
+For a vector target of dimension \eqn{r},
+\eqn{c} is the largest generalized eigenvalue of
+\eqn{\boldsymbol{B} \hat{\boldsymbol{\Gamma}}_{\mathrm{ADF}}
+\boldsymbol{B}^{\prime}} relative to
+\eqn{\boldsymbol{B} \hat{\boldsymbol{\Gamma}}_{\mathrm{N}}
+\boldsymbol{B}^{\prime}} and the cutoff has \eqn{r} degrees of freedom.
+The effect size functions use the same statistic with their own
+\eqn{g}.
+
+The intervals are the sets of parameter values that a likelihood-ratio
+test of the covariance matrix of the response and the regressors
+does not reject at the significance level \code{alpha}.
+With \code{type = "mvn"}, the divisor-\eqn{n} Gaussian covariance likelihood
+and its chi-square cutoff are used.
+With \code{type = "robust"}, the cutoff is scaled by the sample fourth moments
+of the data, so that the intervals are robust to non-normality.
+These are asymptotic procedures,
+without a finite-sample coverage guarantee.
+The solver runs once per significance level.
+The effect size functions (\code{\link[=RSqLB]{RSqLB()}}, \code{\link[=SCorLB]{SCorLB()}}, \code{\link[=PCorLB]{PCorLB()}},
+\code{\link[=DeltaRSqLB]{DeltaRSqLB()}}, \code{\link[=FSqLB]{FSqLB()}}, and \code{\link[=DiffBetaLB]{DiffBetaLB()}}) take the object returned
+by this function and use its \code{type} and \code{control}.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "beta", type = "mvn", alpha = 0.05)
-BetaLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = std)
+summary(object = std)
+coef(object = std)
+confint(object = std, level = 0.95)
+
+}
+\references{
+Dudgeon, P. (2017).
+Some improvements in confidence intervals
+for standardized regression coefficients.
+\emph{Psychometrika}, \emph{82}(4), 928--951.
+\doi{10.1007/s11336-017-9563-z}
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=FSqLB]{FSqLB()}},
 \code{\link[=PCorLB]{PCorLB()}},
 \code{\link[=RSqLB]{RSqLB()}},
-\code{\link[=SCorLB]{SCorLB()}}
+\code{\link[=SCorLB]{SCorLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{std}

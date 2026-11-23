@@ -4,11 +4,18 @@ lapply(X = 1, FUN = function(i, text) {
   testthat::test_that(
     desc = paste(text, "preserves the regression estimand"),
     code = {
-      out <- betaLB::DeltaRSqLB(object = .LBFixture())
-      sr <- stats::coef(object = betaLB::SCorLB(object = .LBFixture()))
-      rsq <- stats::coef(object = betaLB::RSqLB(object = .LBFixture()))["rsq"]
+      out <- betaLB::DeltaRSqLB(
+        object = .LBFixture(), alpha = 0.05,
+        blocks = list(both = c("NARTIC", "PCTGRT"))
+      )
+      sr <- stats::coef(
+        object = betaLB::SCorLB(object = .LBFixture(), alpha = 0.05)
+      )
+      rsq <- stats::coef(
+        object = betaLB::RSqLB(object = .LBFixture(), alpha = 0.05)
+      )["rsq"]
       testthat::expect_equal(
-        object = stats::coef(object = out)[c("wt", "hp")],
+        object = stats::coef(object = out)[c("NARTIC", "PCTGRT")],
         expected = sr^2
       )
       testthat::expect_equal(
@@ -21,7 +28,8 @@ lapply(X = 1, FUN = function(i, text) {
           parm = "block:both"
         )),
         expected = unname(obj = stats::confint(
-          object = betaLB::RSqLB(object = .LBFixture()), parm = "rsq"
+          object = betaLB::RSqLB(object = .LBFixture(), alpha = 0.05),
+          parm = "rsq"
         )),
         tolerance = 1e-6
       )

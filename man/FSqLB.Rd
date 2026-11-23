@@ -2,36 +2,96 @@
 % Please edit documentation in R/betaLB-f-sq-lb.R
 \name{FSqLB}
 \alias{FSqLB}
-\title{Likelihood Intervals for Overall and Local F-Squared}
+\title{Estimate Cohen's f-Squared and Local f-Squared
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-FSqLB(object)
+FSqLB(object, alpha = c(0.05, 0.01, 0.001), blocks = NULL)
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
+
+\item{blocks}{\code{NULL} or a named list of additional predictor blocks,
+given by regressor names or column indices.
+Each block adds an element named \verb{block:<name>} to the output.
+The default \code{NULL} gives one element per regressor.}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object of class \code{eslb}
+which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{fit}{The argument \code{object}.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names.}
+\item{est}{Vector of Cohen's f-squared (\code{fsq}) and local f-squared.}
+\item{intervals}{Data frame of the estimates and the limits
+of each significance level.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+\item{fun}{Function used ("FSqLB").}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate Cohen's f-Squared and Local f-Squared
+and the Corresponding Likelihood-Based Confidence Intervals
+}
+\details{
+Cohen's f-squared is \eqn{f^{2} = R^{2} / ( 1 - R^{2} )}.
+The local f-squared of regressor \eqn{j} is
+\eqn{sr^{2}_{j} / ( 1 - R^{2} )}.
+The limits of \eqn{f^{2}} are the transformed limits of \eqn{R^{2}}.
+With \code{blocks}, the local f-squared is that of a set of regressors;
+the intervals are conservative (vector projection).
+The \code{type} and \code{control} stored in \code{object} are used.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "fsq", type = "mvn", alpha = 0.05)
-FSqLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# FSqLB --------------------------------------------------------------------
+out <- FSqLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
+summary(object = out)
+coef(object = out)
+confint(object = out, level = 0.95)
+
+}
+\references{
+Selya, A. S., Rose, J. S., Dierker, L. C., Hedeker, D., & Mermelstein,
+R. J. (2012).
+A practical guide to calculating Cohen's f2,
+a measure of local effect size, from PROC MIXED.
+\emph{Frontiers in Psychology}, \emph{3}, 111.
+\doi{10.3389/fpsyg.2012.00111}
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=BetaLB]{BetaLB()}},
 \code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=PCorLB]{PCorLB()}},
 \code{\link[=RSqLB]{RSqLB()}},
-\code{\link[=SCorLB]{SCorLB()}}
+\code{\link[=SCorLB]{SCorLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{fsq}

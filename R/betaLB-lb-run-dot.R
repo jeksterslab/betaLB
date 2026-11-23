@@ -1,50 +1,22 @@
-#' Likelihood Intervals for Regression Effect Sizes
+#' Solve the Likelihood Intervals of One Effect Family
 #'
-#' Fit covariance-likelihood regions for independently sampled random
-#' regressors. Compute requested effects, types and confidence levels in one
-#' native batch, then use the effect extractors to select stored results.
-#'
-#' Normal theory uses divisor-n Gaussian covariance likelihood. Robust
-#' calibration uses empirical fourth moments. Signed scalar targets use a
-#' target-specific variance ratio; multi-coefficient nonnegative effects use
-#' conservative vector projection and a largest-eigenvalue robust cutoff.
-#' These are asymptotic procedures, without a finite-sample coverage guarantee.
+#' Build the targets of one effect family, calibrate the cutoffs, and solve all
+#' endpoints in one native batch.
 #' @author Ivan Jacob Agaloos Pesigan
-#' @param object Unweighted, full-rank scalar-response `lm` fit with an
-#'   intercept, stored model frame, no offsets and positive residual variance.
-#' @param type Character vector containing `mvn`, `robust`, or both.
-#' @param alpha Distinct significance levels in (0, 1).
-#' @param effects Requested families: `beta`, `rsq`, `scor`, `pcor`,
-#'   `deltarsq`, `diffbeta`, and `fsq`.
-#' @param std_y Whether to standardize the response for slope targets.
-#' @param std_x Logical flags or names of model-matrix predictors to
-#'   standardize for slope targets. Other effects keep their definitions.
-#' @param blocks Named list of additional predictor blocks, identified by
-#'   model-matrix column names or indices, for increments and local f-squared.
-#' @param control Named list: `maxeval` is the native evaluation budget per
-#'   endpoint; `tolerance` is its normalized verification tolerance.
-#' @return Context of class `lb`, containing named point estimates, a long
-#'   `intervals` table and per-row endpoint `diagnostics`. Failed endpoints
-#'   are `NA` with a specific status. Extractors return `betalb` objects.
-#'   Slope/contrast target IDs retain their standardization flags.
+#' @param data Analysis statistics from `.LBData()`.
+#' @param args Validated options from `.CheckLBArguments()` with the element
+#'   `effects` (one family) added.
+#' @return List with `est`, `intervals`, and `diagnostics`.
 #' @examples
-#' fit <- stats::lm(formula = mpg ~ wt, data = mtcars)
-#' out <- LB(object = fit, type = "mvn", alpha = 0.05, effects = "rsq")
-#' RSqLB(object = out)
-#' @export
-LB <- function(object, type = c("mvn", "robust"),
-               alpha = c(0.05, 0.01, 0.001),
-               effects = c(
-                 "beta", "rsq", "scor", "pcor", "deltarsq",
-                 "diffbeta", "fsq"
-               ),
-               std_y = TRUE, std_x = TRUE, blocks = list(), control = list()) {
-  data <- .LBData(object = object)
-  args <- .CheckLBArguments(
-    type = type, alpha = alpha, effects = effects,
-    std_y = std_y, std_x = std_x, blocks = blocks,
-    control = control, data = data
-  )
+#' d <- .LBData(object = stats::lm(formula = mpg ~ wt, data = mtcars))
+#' args <- .CheckLBArguments(
+#'   type = "mvn", alpha = 0.05, std_y = TRUE, std_x = NULL,
+#'   blocks = NULL, control = list(), data = d
+#' )
+#' args$effects <- "rsq"
+#' .LBRun(data = d, args = args)
+#' @noRd
+.LBRun <- function(data, args) {
   targets <- .LBTargets(data = data, args = args)
   base <- list()
   views <- list()
@@ -129,8 +101,8 @@ LB <- function(object, type = c("mvn", "robust"),
     })
     diagnostics[[id]] <- result$endpoints
     data.frame(
-      effect = view$target$id, label = view$target$label,
-      family = view$target$kind, type = view$type, alpha = view$alpha,
+      effect = view$target$label, family = view$target$kind,
+      type = view$type, alpha = view$alpha,
       estimate = result$estimate, lower = result$lower,
       upper = result$upper,
       lower_status = result$endpoints[[1L]]$status,
@@ -143,17 +115,12 @@ LB <- function(object, type = c("mvn", "robust"),
   })
   intervals <- do.call(what = rbind, args = rows)
   first <- !duplicated(x = intervals$effect)
-  estimates <- stats::setNames(
-    object = intervals$estimate[first],
-    nm = intervals$effect[first]
-  )
-  structure(.Data = list(
-    est = estimates, intervals = intervals,
-    diagnostics = as.list(x = diagnostics), args = args, call = match.call(),
-    lm_process = list(
-      p = data$p, n = data$n,
-      xnames = data$xnames, rows = data$rows
+  list(
+    est = stats::setNames(
+      object = intervals$estimate[first],
+      nm = intervals$effect[first]
     ),
-    data = data
-  ), class = "lb")
+    intervals = intervals,
+    diagnostics = as.list(x = diagnostics)
+  )
 }

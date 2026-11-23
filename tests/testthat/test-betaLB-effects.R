@@ -8,7 +8,10 @@ lapply(
         text, "matches regression identities and finite differences"
       ),
       code = {
-        fit <- stats::lm(formula = mpg ~ wt + hp + qsec, data = mtcars)
+        fit <- stats::lm(
+          formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+          data = betaLB::nas1982
+        )
         d <- betaLB:::.LBData(object = fit)
         for (family in c(
           "beta", "diff", "sr", "pr", "local_f",
@@ -59,13 +62,17 @@ lapply(
         testthat::expect_equal(
           object = slope,
           expected = unname(obj = stats::coef(object = fit)[2L]) *
-            stats::sd(x = mtcars$wt) / stats::sd(x = mtcars$mpg)
+            stats::sd(x = betaLB::nas1982$NARTIC) /
+            stats::sd(x = betaLB::nas1982$QUALITY)
         )
         block <- betaLB:::.LBEffect(
           sigma = d$sigma, target = list(family = "delta", index = c(1L, 2L)),
           units = d$units
         )$value
-        reduced <- stats::lm(formula = mpg ~ qsec, data = mtcars)
+        reduced <- stats::lm(
+          formula = QUALITY ~ PCTSUPP,
+          data = betaLB::nas1982
+        )
         testthat::expect_equal(
           object = sum(block^2),
           expected = summary(object = fit)$r.squared -

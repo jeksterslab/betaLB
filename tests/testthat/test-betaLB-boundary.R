@@ -8,8 +8,8 @@ lapply(
       desc = paste(text, "handles zero without a singular scalar scale"),
       code = {
         orthogonal <- qr.Q(qr = qr(x = cbind(
-          1, mtcars$wt, mtcars$hp,
-          mtcars$mpg
+          1, betaLB::nas1982$NARTIC, betaLB::nas1982$PCTGRT,
+          betaLB::nas1982$QUALITY
         )))
         fixture <- data.frame(
           y = orthogonal[, 4L], x1 = orthogonal[, 2L],
@@ -52,26 +52,22 @@ lapply(
           expected = 0
         )
         testthat::expect_true(object = is.finite(x = out$calibration$scale))
-        native <- betaLB::LB(
-          object = stats::lm(formula = y ~ x1 + x2, data = fixture),
-          effects = c("rsq", "pcor"), type = c("mvn", "robust"), alpha = 0.05
-        )
-        rsq <- betaLB::RSqLB(object = native)
         for (type in c("mvn", "robust")) {
-          ci <- stats::confint(object = rsq, parm = "rsq", type = type)
-          selected <- rsq$intervals$label == "rsq" &
-            rsq$intervals$type == type
-          row <- rsq$intervals[selected, ]
-          testthat::expect_equal(object = ci[1L, "lower"], expected = 0)
+          native <- betaLB::BetaLB(
+            object = stats::lm(formula = y ~ x1 + x2, data = fixture),
+            type = type, alpha = 0.05
+          )
+          rsq <- betaLB::RSqLB(object = native, alpha = 0.05)
+          ci <- stats::confint(object = rsq, parm = "rsq")
+          row <- rsq$intervals[rsq$intervals$effect == "rsq", ]
+          testthat::expect_equal(object = ci[1L, 1L], expected = 0)
           testthat::expect_equal(
-            object = ci[1L, "upper"],
+            object = ci[1L, 2L],
             expected = 1 - exp(x = -row$cutoff / d$n),
             tolerance = 1e-7
           )
           testthat::expect_lt(
-            object = stats::confint(
-              object = rsq, parm = "adj", type = type
-            )[1L, 1L],
+            object = stats::confint(object = rsq, parm = "adj")[1L, 1L],
             expected = 0
           )
         }

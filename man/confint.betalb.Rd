@@ -4,33 +4,45 @@
 \alias{confint.betalb}
 \title{Confidence Intervals Method for an Object of Class \code{betalb}}
 \usage{
-\method{confint}{betalb}(object, parm = NULL, level = 0.95, type = NULL, ...)
+\method{confint}{betalb}(object, parm = NULL, level = 0.95, ...)
 }
 \arguments{
 \item{object}{Object of class \code{betalb}.}
 
-\item{parm}{A specification of which parameters
-are to be given confidence intervals.}
+\item{parm}{a specification of which parameters
+are to be given confidence intervals,
+either a vector of numbers or a vector of names.
+If missing, all parameters are considered.}
 
-\item{level}{Confidence level of stored intervals.
-Only already-computed levels are available.}
+\item{level}{the confidence level required.
+The likelihood intervals are solved for the significance levels
+given in \code{alpha}, so \code{level} must equal \code{1 - alpha}
+for one of them.}
 
-\item{type}{Stored calibration type; \code{NULL} selects the first type.}
-
-\item{...}{Additional arguments.}
+\item{...}{additional arguments.}
 }
 \value{
-Returns a matrix of confidence intervals.
+Returns a matrix of the lower and upper limits
+of the likelihood intervals.
 }
 \description{
 Confidence Intervals Method for an Object of Class \code{betalb}
 }
 \examples{
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-try(stats::confint(object = object))
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+confint(object = out, level = 0.95)
 
 }
 \author{

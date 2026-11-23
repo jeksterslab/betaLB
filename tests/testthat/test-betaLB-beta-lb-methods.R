@@ -1,67 +1,39 @@
 ## ---- test-betaLB-beta-lb-methods
-lapply(
-  X = 1,
-  FUN = function(i,
-                 text) {
-    testthat::skip_on_cran()
-    testthat::test_that(
-      desc = paste(text, "S3 methods"),
-      code = {
-        obj <- list(
-          call = str2lang(s = "LB()"),
-          args = list(type = "mvn"),
-          est = c(x1 = 0.5, x2 = -0.3),
-          ci = matrix(
-            data = c(0.3, -0.5, 0.7, -0.1),
-            nrow = 2,
-            dimnames = list(c("x1", "x2"), c("2.5 %", "97.5 %"))
-          )
-        )
-        class(x = obj) <- "betalb"
-        testthat::expect_equal(
-          object = stats::coef(object = obj),
-          expected = obj$est
-        )
-        testthat::expect_equal(
-          object = stats::confint(object = obj),
-          expected = obj$ci
-        )
-        testthat::expect_equal(
-          object = stats::confint(object = obj, parm = "x1"),
-          expected = obj$ci["x1", , drop = FALSE]
-        )
-        testthat::expect_error(
-          object = stats::vcov(object = obj)
-        )
-        testthat::expect_error(
-          object = stats::confint(object = obj, level = 0.90),
-          regexp = "stored confidence level"
-        )
-        testthat::expect_error(
-          object = summary(object = obj, alpha = 0.10),
-          regexp = "Selecting alpha"
-        )
-        obj$ci <- NULL
-        testthat::expect_error(
-          object = stats::confint(object = obj),
-          regexp = "not available"
-        )
-        testthat::expect_equal(
-          object = unname(obj = attr(
-            x = summary(object = obj), which = "print_summary"
-          )),
-          expected = matrix(data = unname(obj = obj$est), ncol = 1)
-        )
-        summ <- summary(object = obj)
-        testthat::expect_s3_class(
-          object = summ,
-          class = "summary.betalb"
-        )
-        testthat::expect_output(
-          object = print(x = obj)
-        )
-      }
-    )
-  },
-  text = "test-betaLB-beta-lb-methods"
-)
+lapply(X = 1, FUN = function(i, text) {
+  testthat::skip_on_cran()
+  testthat::test_that(
+    desc = paste(text, "S3 methods"),
+    code = {
+      out <- .LBFixture()
+      testthat::expect_equal(
+        object = stats::coef(object = out), expected = out$est
+      )
+      ci <- stats::confint(object = out, parm = "NARTIC", level = 0.90)
+      testthat::expect_equal(object = dim(x = ci), expected = c(1L, 2L))
+      row <- out$intervals[
+        out$intervals$alpha == 0.1 & out$intervals$effect == "NARTIC",
+      ]
+      testthat::expect_equal(
+        object = unname(obj = ci),
+        expected = matrix(data = c(row$lower, row$upper), nrow = 1L)
+      )
+      testthat::expect_equal(
+        object = dim(x = stats::confint(object = out)), expected = c(2L, 2L)
+      )
+      summ <- summary(object = out)
+      testthat::expect_s3_class(object = summ, class = "summary.betalb")
+      testthat::expect_equal(object = ncol(x = summ), expected = 5L)
+      testthat::expect_output(object = print(x = out), regexp = "Call")
+      testthat::expect_output(
+        object = print(x = summ), regexp = "likelihood intervals"
+      )
+      testthat::expect_error(
+        object = stats::vcov(object = out), regexp = "not defined"
+      )
+      testthat::expect_error(
+        object = stats::confint(object = out, level = 0.8),
+        regexp = "not computed"
+      )
+    }
+  )
+}, text = "test-betaLB-beta-lb-methods")

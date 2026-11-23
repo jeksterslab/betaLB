@@ -2,117 +2,106 @@
 #'
 #' @author Ivan Jacob Agaloos Pesigan
 #'
-#' @return Prints a matrix of estimates and confidence intervals.
+#' @return Prints a matrix of
+#'   standardized regression slopes,
+#'   and the lower and upper limits of the likelihood intervals.
+#'   Endpoints that the solver could not verify are reported below the matrix.
 #'
 #' @param x Object of class `betalb`.
-#' @param ... Additional arguments.
+#' @param ... additional arguments.
 #' @param alpha Numeric vector.
 #'   Significance level \eqn{\alpha}.
 #'   If `alpha = NULL`,
-#'   show all stored significance levels.
+#'   use the argument `alpha` used in `x`.
 #' @param digits Digits to print.
-#' @param type Stored calibration type; `NULL` selects all for printing.
 #'
 #' @examples
-#' object <- structure(
-#'   list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-#'   class = "betalb"
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
 #' )
-#' print(x = object)
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' ## Methods -----------------------------------------------------------------
+#' print(x = out)
 #'
 #' @keywords methods
 #' @export
 print.betalb <- function(x,
                          alpha = NULL,
                          digits = 4,
-                         type = NULL,
                          ...) {
   print.summary.betalb(
     x = summary.betalb(
       object = x,
       alpha = alpha,
-      digits = digits,
-      type = type
+      digits = digits
     )
   )
-  invisible(x = x)
 }
+
 #' Summary Method for an Object of Class `betalb`
 #'
 #' @author Ivan Jacob Agaloos Pesigan
 #'
-#' @return Returns a matrix or list of estimates and confidence intervals.
+#' @return Returns a matrix of
+#'   standardized regression slopes,
+#'   and the lower and upper limits of the likelihood intervals.
 #'
 #' @param object Object of class `betalb`.
-#' @param ... Additional arguments.
+#' @param ... additional arguments.
 #' @param alpha Numeric vector.
 #'   Significance level \eqn{\alpha}.
 #'   If `alpha = NULL`,
-#'   show all stored significance levels.
+#'   use the argument `alpha` used in `object`.
+#'   Only significance levels that were computed are available.
 #' @param digits Digits to print.
-#' @param type Stored calibration type; `NULL` selects all.
 #'
 #' @examples
-#' object <- structure(
-#'   list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-#'   class = "betalb"
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
 #' )
-#' summary(object = object)
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' ## Methods -----------------------------------------------------------------
+#' summary(object = out)
 #'
 #' @keywords methods
 #' @export
 summary.betalb <- function(object,
                            alpha = NULL,
                            digits = 4,
-                           type = NULL,
                            ...) {
   bad_digits <- !is.numeric(x = digits) || length(x = digits) != 1L ||
     !is.finite(x = digits) || digits < 0 || digits != floor(x = digits)
   if (bad_digits) {
     stop("digits must be a nonnegative integer.")
   }
-  if (!is.null(x = object$intervals)) {
-    ci <- object$intervals
-    if (!is.null(x = alpha)) {
-      bad_alpha <- !is.numeric(x = alpha) || anyNA(x = alpha) ||
-        any(x = !alpha %in% object$args$alpha)
-      if (bad_alpha) {
-        stop("The requested significance levels were not computed.")
-      }
-      ci <- ci[ci$alpha %in% alpha, , drop = FALSE]
-    }
-    if (!is.null(x = type)) {
-      bad_type <- !is.character(x = type) || anyNA(x = type) ||
-        any(x = !type %in% object$args$type)
-      if (bad_type) {
-        stop("The requested calibration types were not computed.")
-      }
-      ci <- ci[ci$type %in% type, , drop = FALSE]
-    }
-    print_summary <- ci[, c(
-      "effect", "type", "alpha", "estimate", "lower",
-      "upper", "lower_status", "upper_status",
-      "calibration", "dimension"
-    ), drop = FALSE]
-    for (name in c("estimate", "lower", "upper")) {
-      print_summary[[name]] <- round(
-        x = print_summary[[name]], digits = digits
-      )
-    }
-  } else {
-    if (!is.null(x = alpha)) {
-      stop("Selecting alpha is unavailable; use stored intervals.")
-    }
-    ci <- if (!is.null(x = object$ci)) {
-      object$ci
-    } else {
-      matrix(
-        data = object$est, ncol = 1,
-        dimnames = list(names(x = object$est), "est")
-      )
-    }
-    print_summary <- round(x = ci, digits = digits)
-  }
+  ci <- .LBCI(
+    object = object,
+    alpha = alpha
+  )
+  print_summary <- round(
+    x = ci,
+    digits = digits
+  )
+  attr(
+    x = print_summary,
+    which = "status"
+  ) <- NULL
   attr(
     x = ci,
     which = "fit"
@@ -129,22 +118,37 @@ summary.betalb <- function(object,
     x = ci,
     which = "digits"
   ) <- digits
-  class(x = ci) <- c("summary.betalb", class(x = ci))
+  class(x = ci) <- "summary.betalb"
   ci
 }
-#' Print a Likelihood Summary
+
+#' Print Method for an Object of Class `summary.betalb`
 #'
-#' Display stored estimates and intervals without computing new intervals.
 #' @author Ivan Jacob Agaloos Pesigan
+#'
+#' @return Prints the matrix returned by `summary.betalb()`.
+#'
 #' @param x Object of class `summary.betalb`.
-#' @param ... Additional arguments.
-#' @return Invisibly returns `x`.
+#' @param ... additional arguments.
+#'
 #' @examples
-#' object <- structure(list(est = c(x = 0.5)), class = "betalb")
-#' print(x = summary(object = object))
-#' @noRd
-#' @keywords internal
-#' @exportS3Method print summary.betalb
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
+#' )
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' ## Methods -----------------------------------------------------------------
+#' print(x = summary(object = out))
+#'
+#' @keywords methods
+#' @export
 print.summary.betalb <- function(x,
                                  ...) {
   print_summary <- attr(
@@ -155,38 +159,56 @@ print.summary.betalb <- function(x,
     x = x,
     which = "fit"
   )
-  type <- object$args$type
   cat("Call:\n")
-  print(x = object$call)
+  base::print(x = object$call)
   cat(
-    paste0(
-      "\nLikelihood intervals (vector projections are conservative)\n",
-      "type = ",
-      "\"",
-      paste(type, collapse = ", "),
-      "\"",
-      "\n"
-    )
+    "\nStandardized regression slopes with",
+    toupper(x = object$args$type),
+    "likelihood intervals:\n"
   )
   print(x = print_summary)
+  status <- attr(
+    x = x,
+    which = "status"
+  )
+  failed <- status[
+    !(status$lower_status %in% c("ok", "boundary_zero")) |
+      !(status$upper_status %in% c("ok", "boundary_zero")), ,
+    drop = FALSE
+  ]
+  if (nrow(x = failed) > 0L) {
+    cat("\nEndpoints with a status other than ok:\n")
+    print(x = failed, row.names = FALSE)
+  }
   invisible(x = x)
 }
-#' Sampling Variance-Covariance Matrix Method for an Object of Class `betalb`
+
+#' Sampling Covariance Matrix Method for an Object of Class `betalb`
+#'
+#' Likelihood intervals do not come from a sampling covariance matrix.
 #'
 #' @author Ivan Jacob Agaloos Pesigan
 #'
-#' @return Stops with an error because profile likelihood intervals do not
-#'   define a covariance matrix.
+#' @return Stops with an error.
 #'
 #' @param object Object of class `betalb`.
-#' @param ... Additional arguments.
+#' @param ... additional arguments.
 #'
 #' @examples
-#' object <- structure(
-#'   list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-#'   class = "betalb"
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
 #' )
-#' try(stats::vcov(object = object))
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' # try ----------------------------------------------------------------------
+#' try(vcov(object = out))
 #'
 #' @keywords methods
 #' @export
@@ -194,21 +216,31 @@ vcov.betalb <- function(object,
                         ...) {
   stop("A covariance matrix is not defined for likelihood-based intervals.")
 }
-#' Estimated Parameter Method for an Object of Class `betalb`
+
+#' Estimated Parameters Method for an Object of Class `betalb`
 #'
 #' @author Ivan Jacob Agaloos Pesigan
 #'
-#' @return Returns a vector of estimated parameters.
+#' @return Returns a vector of standardized regression slopes.
 #'
 #' @param object Object of class `betalb`.
-#' @param ... Additional arguments.
+#' @param ... additional arguments.
 #'
 #' @examples
-#' object <- structure(
-#'   list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-#'   class = "betalb"
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
 #' )
-#' stats::coef(object = object)
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' ## Methods -----------------------------------------------------------------
+#' coef(object = out)
 #'
 #' @keywords methods
 #' @export
@@ -216,56 +248,66 @@ coef.betalb <- function(object,
                         ...) {
   object$est
 }
+
 #' Confidence Intervals Method for an Object of Class `betalb`
 #'
 #' @author Ivan Jacob Agaloos Pesigan
 #'
-#' @return Returns a matrix of confidence intervals.
+#' @return Returns a matrix of the lower and upper limits
+#'   of the likelihood intervals.
 #'
 #' @param object Object of class `betalb`.
-#' @param ... Additional arguments.
-#' @param parm A specification of which parameters
-#'   are to be given confidence intervals.
-#' @param level Confidence level of stored intervals.
-#'   Only already-computed levels are available.
-#' @param type Stored calibration type; `NULL` selects the first type.
+#' @param ... additional arguments.
+#' @param parm a specification of which parameters
+#'   are to be given confidence intervals,
+#'   either a vector of numbers or a vector of names.
+#'   If missing, all parameters are considered.
+#' @param level the confidence level required.
+#'   The likelihood intervals are solved for the significance levels
+#'   given in `alpha`, so `level` must equal `1 - alpha`
+#'   for one of them.
 #'
 #' @examples
-#' object <- structure(
-#'   list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-#'   class = "betalb"
+#' # Data ---------------------------------------------------------------------
+#' data("nas1982", package = "betaLB")
+#'
+#' # Fit Model in lm ----------------------------------------------------------
+#' object <- stats::lm(
+#'   formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+#'   data = nas1982
 #' )
-#' try(stats::confint(object = object))
+#'
+#' # BetaLB -------------------------------------------------------------------
+#' out <- BetaLB(object = object, alpha = 0.05)
+#'
+#' ## Methods -----------------------------------------------------------------
+#' confint(object = out, level = 0.95)
 #'
 #' @keywords methods
 #' @export
 confint.betalb <- function(object,
                            parm = NULL,
                            level = 0.95,
-                           type = NULL,
                            ...) {
-  if (!is.null(x = object$intervals)) {
-    ci <- .LBIntervals(
-      object = object, parm = parm, level = level, type = type
-    )
-  } else {
-    stored_alpha <- object$args$alpha
-    if (is.null(x = stored_alpha)) {
-      stored_alpha <- 0.05
-    }
-    if (!isTRUE(x = all.equal(target = level, current = 1 - stored_alpha))) {
-      stop("Only the stored confidence level is available in the scaffold.")
-    }
-    if (is.null(x = object$ci)) {
-      stop("Confidence intervals are not available.")
-    } else {
-      ci <- object$ci
-      if (is.null(x = parm)) {
-        ci
-      } else {
-        ci <- ci[parm, , drop = FALSE]
-      }
-    }
+  bad_level <- !is.numeric(x = level) || length(x = level) != 1L ||
+    !is.finite(x = level) || level <= 0 || level >= 1
+  if (bad_level) {
+    stop("level must be a single confidence level in (0, 1).")
   }
+  if (is.null(x = parm)) {
+    parm <- seq_along(along.with = object$est)
+  }
+  ci <- .LBCI(
+    object = object,
+    alpha = 1 - level
+  )[parm, 2:3, drop = FALSE]
+  varnames <- colnames(x = ci)
+  varnames <- gsub(
+    pattern = "%",
+    replacement = " %",
+    x = varnames
+  )
+  colnames(x = ci) <- varnames
+  attr(x = ci, which = "status") <- NULL
   ci
 }

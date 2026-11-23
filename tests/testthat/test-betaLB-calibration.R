@@ -9,7 +9,10 @@ lapply(
       ),
       code = {
         d <- betaLB:::.LBData(
-          object = stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+          object = stats::lm(
+            formula = QUALITY ~ NARTIC + PCTGRT,
+            data = betaLB::nas1982
+          )
         )
         d$gamma_adf <- d$gamma_n
         target <- list(family = "rsq")

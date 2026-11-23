@@ -4,8 +4,11 @@ lapply(X = 1, FUN = function(i, text) {
   testthat::test_that(
     desc = paste(text, "preserves the regression estimand"),
     code = {
-      out <- betaLB::RSqLB(object = .LBFixture())
-      fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+      out <- betaLB::RSqLB(object = .LBFixture(), alpha = 0.05)
+      fit <- stats::lm(
+        formula = QUALITY ~ NARTIC + PCTGRT,
+        data = betaLB::nas1982
+      )
       expected <- c(
         rsq = summary(object = fit)$r.squared,
         adj = summary(object = fit)$adj.r.squared

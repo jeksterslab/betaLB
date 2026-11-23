@@ -2,36 +2,82 @@
 % Please edit documentation in R/betaLB-p-cor-lb.R
 \name{PCorLB}
 \alias{PCorLB}
-\title{Likelihood Intervals for Squared Partial Correlations}
+\title{Estimate Squared Partial Correlation Coefficients
+and the Corresponding Likelihood-Based Confidence Intervals}
 \usage{
-PCorLB(object)
+PCorLB(object, alpha = c(0.05, 0.01, 0.001))
 }
 \arguments{
-\item{object}{Context returned by \code{LB()}, with this family computed.}
+\item{object}{Object of class \code{betalb}.
+The output of \code{\link[=BetaLB]{BetaLB()}}.}
+
+\item{alpha}{Numeric vector.
+Significance level \eqn{\alpha}.}
 }
 \value{
-Object of class \code{betalb}; use \code{coef()}, \code{confint()} or \code{summary()}.
+Returns an object of class \code{eslb}
+which is a list with the following elements:
+\describe{
+\item{call}{Function call.}
+\item{fit}{The argument \code{object}.}
+\item{args}{Function arguments.}
+\item{lm_process}{Sample size, number of regressors,
+and regressor names.}
+\item{est}{Vector of squared partial correlation coefficients.}
+\item{intervals}{Data frame of the estimates and the limits
+of each significance level.}
+\item{diagnostics}{Solver diagnostics of each endpoint.}
+\item{fun}{Function used ("PCorLB").}
+}
 }
 \description{
-Extract already-computed point estimates and intervals from an LB context.
-For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate Squared Partial Correlation Coefficients
+and the Corresponding Likelihood-Based Confidence Intervals
+}
+\details{
+The squared partial correlation of regressor \eqn{j} is
+\eqn{pr^{2}_{j} = sr^{2}_{j} / ( 1 - R^{2} + sr^{2}_{j} )},
+the proportion of the variance in the outcome not explained
+by the other regressors that is explained by regressor \eqn{j}.
+The intervals are profile likelihood intervals of a nonnegative quantity.
+The \code{type} and \code{control} stored in \code{object} are used.
 }
 \examples{
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "pcor", type = "mvn", alpha = 0.05)
-PCorLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# PCorLB -------------------------------------------------------------------
+out <- PCorLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
+summary(object = out)
+coef(object = out)
+confint(object = out, level = 0.95)
+
 }
 \seealso{
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 \code{\link[=BetaLB]{BetaLB()}},
 \code{\link[=DeltaRSqLB]{DeltaRSqLB()}},
 \code{\link[=DiffBetaLB]{DiffBetaLB()}},
 \code{\link[=FSqLB]{FSqLB()}},
 \code{\link[=RSqLB]{RSqLB()}},
-\code{\link[=SCorLB]{SCorLB()}}
+\code{\link[=SCorLB]{SCorLB()}},
+\code{\link[=SCorSqLB]{SCorSqLB()}}
 }
 \author{
 Ivan Jacob Agaloos Pesigan
 }
-\concept{Likelihood Effect Extractors}
+\concept{Beta Likelihood-Based Functions}
+\keyword{betaLB}
+\keyword{pcor}

@@ -2,27 +2,36 @@
 % Please edit documentation in R/betaLB-beta-lb-methods.R
 \name{coef.betalb}
 \alias{coef.betalb}
-\title{Estimated Parameter Method for an Object of Class \code{betalb}}
+\title{Estimated Parameters Method for an Object of Class \code{betalb}}
 \usage{
 \method{coef}{betalb}(object, ...)
 }
 \arguments{
 \item{object}{Object of class \code{betalb}.}
 
-\item{...}{Additional arguments.}
+\item{...}{additional arguments.}
 }
 \value{
-Returns a vector of estimated parameters.
+Returns a vector of standardized regression slopes.
 }
 \description{
-Estimated Parameter Method for an Object of Class \code{betalb}
+Estimated Parameters Method for an Object of Class \code{betalb}
 }
 \examples{
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-stats::coef(object = object)
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+coef(object = out)
 
 }
 \author{

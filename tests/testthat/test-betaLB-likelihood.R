@@ -8,9 +8,16 @@ lapply(
         text, "uses ML moments and analytic likelihood derivatives"
       ),
       code = {
-        fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
+        fit <- stats::lm(
+          formula = QUALITY ~ NARTIC + PCTGRT,
+          data = betaLB::nas1982
+        )
         d <- betaLB:::.LBData(object = fit)
-        z <- cbind(mtcars$mpg, mtcars$wt, mtcars$hp)
+        z <- cbind(
+          betaLB::nas1982$QUALITY,
+          betaLB::nas1982$NARTIC,
+          betaLB::nas1982$PCTGRT
+        )
         centered <- sweep(
           x = z, MARGIN = 2L,
           STATS = colMeans(x = z), FUN = "-"
@@ -44,7 +51,7 @@ lapply(
           expected = fd, tolerance = 1e-6
         )
         null <- betaLB:::.LBNull(data = d, index = 1L)
-        reduced <- stats::lm(formula = mpg ~ hp, data = mtcars)
+        reduced <- stats::lm(formula = QUALITY ~ PCTGRT, data = betaLB::nas1982)
         loss_ratio <- sum(reduced$residuals^2) / sum(fit$residuals^2)
         testthat::expect_equal(
           object = null$loss,
@@ -56,17 +63,23 @@ lapply(
         )
         testthat::expect_error(
           object = betaLB:::.LBData(object = stats::lm(
-            formula = mpg ~ wt - 1, data = mtcars
+            formula = QUALITY ~ NARTIC - 1, data = betaLB::nas1982
           )), regexp = "intercept"
         )
         testthat::expect_error(
           object = betaLB:::.LBData(object = stats::lm(
-            formula = mpg ~ wt, data = mtcars, weights = rep(x = 1, times = 32)
+            formula = QUALITY ~ NARTIC, data = betaLB::nas1982, weights = rep(
+              x = 1,
+              times = 46
+            )
           )), regexp = "Weights"
         )
         testthat::expect_error(
           object = betaLB:::.LBData(object = stats::lm(
-            formula = y ~ x, data = data.frame(y = mtcars$wt, x = mtcars$wt)
+            formula = y ~ x, data = data.frame(
+              y = betaLB::nas1982$NARTIC,
+              x = betaLB::nas1982$NARTIC
+            )
           )), regexp = "rank|covariance|residual"
         )
       }

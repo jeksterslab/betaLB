@@ -4,7 +4,7 @@
 \alias{summary.betalb}
 \title{Summary Method for an Object of Class \code{betalb}}
 \usage{
-\method{summary}{betalb}(object, alpha = NULL, digits = 4, type = NULL, ...)
+\method{summary}{betalb}(object, alpha = NULL, digits = 4, ...)
 }
 \arguments{
 \item{object}{Object of class \code{betalb}.}
@@ -12,26 +12,36 @@
 \item{alpha}{Numeric vector.
 Significance level \eqn{\alpha}.
 If \code{alpha = NULL},
-show all stored significance levels.}
+use the argument \code{alpha} used in \code{object}.
+Only significance levels that were computed are available.}
 
 \item{digits}{Digits to print.}
 
-\item{type}{Stored calibration type; \code{NULL} selects all.}
-
-\item{...}{Additional arguments.}
+\item{...}{additional arguments.}
 }
 \value{
-Returns a matrix or list of estimates and confidence intervals.
+Returns a matrix of
+standardized regression slopes,
+and the lower and upper limits of the likelihood intervals.
 }
 \description{
 Summary Method for an Object of Class \code{betalb}
 }
 \examples{
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-summary(object = object)
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+summary(object = out)
 
 }
 \author{

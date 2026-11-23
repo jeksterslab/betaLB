@@ -10,7 +10,7 @@ lapply(
       ),
       code = {
         d <- betaLB:::.LBData(
-          object = stats::lm(formula = mpg ~ wt, data = mtcars)
+          object = stats::lm(formula = QUALITY ~ NARTIC, data = betaLB::nas1982)
         )
         sample_r <- d$sigma[1L, 2L]
         for (type in c("mvn", "robust")) {
