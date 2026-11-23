@@ -1,9 +1,14 @@
-pandoc: '3.13'
+pandoc: '3.14'
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  betaLB: betaLB.html
+  example-beta-lb: example-beta-lb.html
+  example-diff-beta-lb: example-diff-beta-lb.html
+  example-es-lb: example-es-lb.html
+  example-r-sq-lb: example-r-sq-lb.html
   session: session.html
-last_built: 2026-11-12T19:19Z
+last_built: 2026-11-23T03:33Z
 urls:
   reference: https://jeksterslab.github.io/betaLB//reference
   article: https://jeksterslab.github.io/betaLB//articles

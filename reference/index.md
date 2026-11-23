@@ -1,63 +1,105 @@
 # Package index
 
-## Likelihood Engine
-
-- [`LB()`](https://jeksterslab.github.io/betaLB/reference/LB.md) :
-  Likelihood Intervals for Regression Effect Sizes
-
-## Effect Sizes
+## Standardized Regression Coefficients
 
 - [`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)
-  : Likelihood Intervals for Standardized Regression Slopes
+  : Estimate Standardized Regression Coefficients and the Corresponding
+  Likelihood-Based Confidence Intervals
+
+## R-Squared
+
 - [`RSqLB()`](https://jeksterslab.github.io/betaLB/reference/RSqLB.md) :
-  Likelihood Intervals for R-Squared and Its Finite-Sample Adjustment
+  Estimate R-Squared and Adjusted R-Squared and the Corresponding
+  Likelihood-Based Confidence Intervals
+
+## Semipartial and Squared Partial Correlations
+
 - [`SCorLB()`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md)
-  : Likelihood Intervals for Signed Semipartial Correlations
+  : Estimate Semipartial Correlation Coefficients and the Corresponding
+  Likelihood-Based Confidence Intervals
 - [`SCorSqLB()`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md)
-  : Squared Signed-Semipartial Confidence Intervals
+  : Estimate Squared Semipartial Correlation Coefficients and the
+  Corresponding Confidence Intervals From the Signed Intervals
 - [`PCorLB()`](https://jeksterslab.github.io/betaLB/reference/PCorLB.md)
-  : Likelihood Intervals for Squared Partial Correlations
+  : Estimate Squared Partial Correlation Coefficients and the
+  Corresponding Likelihood-Based Confidence Intervals
+
+## Improvement in R-Squared and Cohen’s f-Squared
+
 - [`DeltaRSqLB()`](https://jeksterslab.github.io/betaLB/reference/DeltaRSqLB.md)
-  : Likelihood Intervals for Increments in R-Squared
-- [`DiffBetaLB()`](https://jeksterslab.github.io/betaLB/reference/DiffBetaLB.md)
-  : Likelihood Intervals for Differences of Standardized Slopes
+  : Estimate Improvement in R-Squared and the Corresponding
+  Likelihood-Based Confidence Intervals
 - [`FSqLB()`](https://jeksterslab.github.io/betaLB/reference/FSqLB.md) :
-  Likelihood Intervals for Overall and Local F-Squared
+  Estimate Cohen's f-Squared and Local f-Squared and the Corresponding
+  Likelihood-Based Confidence Intervals
+
+## Differences of Standardized Regression Coefficients
+
+- [`DiffBetaLB()`](https://jeksterslab.github.io/betaLB/reference/DiffBetaLB.md)
+  : Estimate Differences of Standardized Regression Coefficients and the
+  Corresponding Likelihood-Based Confidence Intervals
 
 ## Methods
 
 - [`coef(`*`<betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/coef.betalb.md)
   :
 
-  Estimated Parameter Method for an Object of Class `betalb`
+  Estimated Parameters Method for an Object of Class `betalb`
+
+- [`coef(`*`<eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/coef.eslb.md)
+  :
+
+  Estimated Parameters Method for an Object of Class `eslb`
 
 - [`confint(`*`<betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/confint.betalb.md)
   :
 
   Confidence Intervals Method for an Object of Class `betalb`
 
+- [`confint(`*`<eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/confint.eslb.md)
+  :
+
+  Confidence Intervals Method for an Object of Class `eslb`
+
 - [`print(`*`<betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.betalb.md)
   :
 
   Print Method for an Object of Class `betalb`
 
-- [`print(`*`<lb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.lb.md)
-  [`summary(`*`<lb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.lb.md)
-  [`coef(`*`<lb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.lb.md)
-  [`confint(`*`<lb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.lb.md)
-  [`vcov(`*`<lb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.lb.md)
-  : Methods for a Batched Likelihood Context
+- [`print(`*`<eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.eslb.md)
+  :
+
+  Print Method for an Object of Class `eslb`
+
+- [`print(`*`<summary.betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.summary.betalb.md)
+  :
+
+  Print Method for an Object of Class `summary.betalb`
+
+- [`print(`*`<summary.eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/print.summary.eslb.md)
+  :
+
+  Print Method for an Object of Class `summary.eslb`
 
 - [`summary(`*`<betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/summary.betalb.md)
   :
 
   Summary Method for an Object of Class `betalb`
 
+- [`summary(`*`<eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/summary.eslb.md)
+  :
+
+  Summary Method for an Object of Class `eslb`
+
 - [`vcov(`*`<betalb>`*`)`](https://jeksterslab.github.io/betaLB/reference/vcov.betalb.md)
   :
 
-  Sampling Variance-Covariance Matrix Method for an Object of Class
-  `betalb`
+  Sampling Covariance Matrix Method for an Object of Class `betalb`
+
+- [`vcov(`*`<eslb>`*`)`](https://jeksterslab.github.io/betaLB/reference/vcov.eslb.md)
+  :
+
+  Sampling Covariance Matrix Method for an Object of Class `eslb`
 
 ## Data
 

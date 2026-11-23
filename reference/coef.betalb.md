@@ -1,6 +1,6 @@
-# Estimated Parameter Method for an Object of Class `betalb`
+# Estimated Parameters Method for an Object of Class `betalb`
 
-Estimated Parameter Method for an Object of Class `betalb`
+Estimated Parameters Method for an Object of Class `betalb`
 
 ## Usage
 
@@ -17,11 +17,11 @@ coef(object, ...)
 
 - ...:
 
-  Additional arguments.
+  additional arguments.
 
 ## Value
 
-Returns a vector of estimated parameters.
+Returns a vector of standardized regression slopes.
 
 ## Author
 
@@ -30,11 +30,20 @@ Ivan Jacob Agaloos Pesigan
 ## Examples
 
 ``` r
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-stats::coef(object = object)
-#>   x 
-#> 0.5 
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+coef(object = out)
+#>    NARTIC    PCTGRT   PCTSUPP 
+#> 0.4951451 0.3914887 0.2632477 
 ```

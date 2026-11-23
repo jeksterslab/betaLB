@@ -6,7 +6,7 @@ Print Method for an Object of Class `betalb`
 
 ``` r
 # S3 method for class 'betalb'
-print(x, alpha = NULL, digits = 4, type = NULL, ...)
+print(x, alpha = NULL, digits = 4, ...)
 ```
 
 ## Arguments
@@ -18,23 +18,21 @@ print(x, alpha = NULL, digits = 4, type = NULL, ...)
 - alpha:
 
   Numeric vector. Significance level \\(\alpha\\). If `alpha = NULL`,
-  show all stored significance levels.
+  use the argument `alpha` used in `x`.
 
 - digits:
 
   Digits to print.
 
-- type:
-
-  Stored calibration type; `NULL` selects all for printing.
-
 - ...:
 
-  Additional arguments.
+  additional arguments.
 
 ## Value
 
-Prints a matrix of estimates and confidence intervals.
+Prints a matrix of standardized regression slopes, and the lower and
+upper limits of the likelihood intervals. Endpoints that the solver
+could not verify are reported below the matrix.
 
 ## Author
 
@@ -43,16 +41,26 @@ Ivan Jacob Agaloos Pesigan
 ## Examples
 
 ``` r
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-print(x = object)
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
 #> Call:
-#> NULL
+#> BetaLB(object = object, alpha = 0.05)
 #> 
-#> Likelihood intervals (vector projections are conservative)
-#> type = "mvn"
-#>   est
-#> x 0.5
+#> Standardized regression slopes with MVN likelihood intervals:
+#>            est   2.5%  97.5%
+#> NARTIC  0.4951 0.3423 0.6394
+#> PCTGRT  0.3915 0.2395 0.5426
+#> PCTSUPP 0.2632 0.1179 0.4148
 ```

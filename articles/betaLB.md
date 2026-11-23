@@ -1,0 +1,137 @@
+# betaLB: Likelihood-Based Confidence Intervals for Regression Effect Sizes
+
+[![R-Universe
+Status](https://jeksterslab.r-universe.dev/badges/betaLB)](https://jeksterslab.r-universe.dev)
+[![Make
+Project](https://github.com/jeksterslab/betaLB/actions/workflows/make.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/make.yml)
+[![R-CMD-check-standard](https://github.com/jeksterslab/betaLB/actions/workflows/check-standard.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/check-standard.yml)
+[![R-CMD-check-oldrel](https://github.com/jeksterslab/betaLB/actions/workflows/check-oldrel.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/check-oldrel.yml)
+[![R Package Test
+Coverage](https://github.com/jeksterslab/betaLB/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/test-coverage.yml)
+[![Lint R
+Package](https://github.com/jeksterslab/betaLB/actions/workflows/lint.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/lint.yml)
+[![Package Website (GitHub
+Pages)](https://github.com/jeksterslab/betaLB/actions/workflows/pkgdown-gh-pages.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/pkgdown-gh-pages.yml)
+[![Compile
+LaTeX](https://github.com/jeksterslab/betaLB/actions/workflows/latex.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/latex.yml)
+[![Shell
+Check](https://github.com/jeksterslab/betaLB/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/shellcheck.yml)
+[![pages-build-deployment](https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment)
+[![codecov](https://codecov.io/gh/jeksterslab/betaLB/branch/main/graph/badge.svg?token=KVLUET3DJ6)](https://codecov.io/gh/jeksterslab/betaLB)
+
+## Description
+
+Generates profile likelihood confidence intervals for standardized
+regression coefficients (beta) and other effect sizes, including
+multiple correlation, semipartial correlations, improvement in
+R-squared, squared partial correlations, differences in standardized
+regression coefficients, and Cohen’s f-squared, for models fitted by
+[`lm()`](https://rdrr.io/r/stats/lm.html). The intervals invert the
+Gaussian likelihood-ratio test of the covariance matrix of the outcome
+and the regressors, with a normal-theory or a robust (fourth-moment)
+cutoff.
+
+## Installation
+
+You can install the development version of `betaLB` from
+[GitHub](https://github.com/jeksterslab/betaLB) with:
+
+\
+`if`` ``(``!`[`require`](https://rdrr.io/r/base/library.html)`(`[`"pak"`](https://pak.r-lib.org/)`)``)`` `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"pak"``)`\
+`pak``::`[`pkg_install`](https://pak.r-lib.org/reference/pkg_install.html)`(``"jeksterslab/betaLB"``)`
+
+## Example
+
+In this example, a multiple regression model is fitted using program
+quality ratings (`QUALITY`) as the regressand/outcome variable and
+number of published articles attributed to the program faculty members
+(`NARTIC`), percent of faculty members holding research grants
+(`PCTGRT`), and percentage of program graduates who received support
+(`PCTSUPP`) as regressor/predictor variables using a data set from 1982
+ratings of 46 doctoral programs in psychology in the USA (National
+Research Council, 1982). Likelihood-based confidence intervals for the
+standardized regression coefficients are generated using the
+[`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)
+function from the `betaLB` package.
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(``package ``=`` ``betaLB``)`
+
+\
+`df`` ``<-`` ``betaLB``::`[`nas1982`](https://jeksterslab.github.io/betaLB/reference/nas1982.md)
+
+### Fit the regression model using the `lm()` function.
+
+\
+`object`` ``<-`` ``stats``::`[`lm`](https://rdrr.io/r/stats/lm.html)`(``formula ``=`` ``QUALITY`` ``~`` ``NARTIC`` ``+`` ``PCTGRT`` ``+`` ``PCTSUPP``, data ``=`` ``df``)`
+
+### Estimate the standardized regression slopes and the corresponding likelihood-based confidence intervals.
+
+\
+[`BetaLB`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)`(``object ``=`` ``object``, type ``=`` ``"mvn"``, alpha ``=`` ``0.05``)`\
+`#> Call:`\
+`#> BetaLB(object = object, type = "mvn", alpha = 0.05)`\
+`#> `\
+`#> Standardized regression slopes with MVN likelihood intervals:`\
+`#>            est   2.5%  97.5%`\
+`#> NARTIC  0.4951 0.3423 0.6394`\
+`#> PCTGRT  0.3915 0.2395 0.5426`\
+`#> PCTSUPP 0.2632 0.1179 0.4148`
+
+## Other Features
+
+The package provides the following functions.
+
+| Function | Purpose |
+|----|----|
+| [`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md) | Standardized regression coefficients with normal-theory (`type = "mvn"`) or robust (`type = "robust"`) likelihood intervals |
+| [`RSqLB()`](https://jeksterslab.github.io/betaLB/reference/RSqLB.md) | R-squared and adjusted R-squared |
+| [`DiffBetaLB()`](https://jeksterslab.github.io/betaLB/reference/DiffBetaLB.md) | Differences of standardized regression coefficients |
+| [`SCorLB()`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md) | Semipartial correlations |
+| [`SCorSqLB()`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md) | Squared semipartial correlations (squared signed interval) |
+| [`PCorLB()`](https://jeksterslab.github.io/betaLB/reference/PCorLB.md) | Squared partial correlations |
+| [`DeltaRSqLB()`](https://jeksterslab.github.io/betaLB/reference/DeltaRSqLB.md) | Improvement in R-squared |
+| [`FSqLB()`](https://jeksterslab.github.io/betaLB/reference/FSqLB.md) | Cohen’s f-squared and local f-squared |
+
+The [`coef()`](https://rdrr.io/r/stats/coef.html),
+[`confint()`](https://rdrr.io/r/stats/confint.html),
+[`summary()`](https://rdrr.io/r/base/summary.html), and
+[`print()`](https://rdrr.io/r/base/print.html) methods are available for
+the returned objects. The effect-size functions take the output of
+[`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)
+and use its `type` and `control`. Scalar targets use profile-likelihood
+regions; multi-coefficient targets use a conservative vector projection,
+and the output names the calibration and its dimension. An unverified
+endpoint is `NA`; no Wald endpoint is substituted. Robust calibration
+assumes independently sampled random regressors and finite fourth
+moments. Examples for each function are in the package vignettes.
+
+## Effect Sizes
+
+The definitions, formulas, and notes on the intervals are in the help
+pages of the functions and in the vignette [betaLB: Example Using the
+Effect Size
+Functions](https://jeksterslab.github.io/betaLB/articles/example-es-lb.md).
+
+## Documentation
+
+See [GitHub Pages](https://jeksterslab.github.io/betaLB/index.html) for
+package documentation.
+
+## Citation
+
+To cite `betaLB` in publications, please run `citation("betaLB")`.
+
+## References
+
+Dudgeon, P. (2017). Some improvements in confidence intervals for
+standardized regression coefficients. *Psychometrika*, *82*(4), 928–951.
+<https://doi.org/10.1007/s11336-017-9563-z>
+
+National Research Council. (1982). *An assessment of research-doctorate
+programs in the United States: Social and behavioral sciences*. National
+Academies Press. <https://doi.org/10.17226/9781>
+
+R Core Team. (2026). *R: A language and environment for statistical
+computing*. R Foundation for Statistical Computing.
+<https://www.R-project.org/>

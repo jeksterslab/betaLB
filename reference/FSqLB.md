@@ -1,39 +1,95 @@
-# Likelihood Intervals for Overall and Local F-Squared
+# Estimate Cohen's f-Squared and Local f-Squared and the Corresponding Likelihood-Based Confidence Intervals
 
-Extract already-computed point estimates and intervals from an LB
-context. For multi-coefficient nonnegative effects, vector projection is
-conservative.
+Estimate Cohen's f-Squared and Local f-Squared and the Corresponding
+Likelihood-Based Confidence Intervals
 
 ## Usage
 
 ``` r
-FSqLB(object)
+FSqLB(object, alpha = c(0.05, 0.01, 0.001), blocks = NULL)
 ```
 
 ## Arguments
 
 - object:
 
-  Context returned by
-  [`LB()`](https://jeksterslab.github.io/betaLB/reference/LB.md), with
-  this family computed.
+  Object of class `betalb`. The output of
+  [`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md).
+
+- alpha:
+
+  Numeric vector. Significance level \\(\alpha\\).
+
+- blocks:
+
+  `NULL` or a named list of additional predictor blocks, given by
+  regressor names or column indices. Each block adds an element named
+  `block:<name>` to the output. The default `NULL` gives one element per
+  regressor.
 
 ## Value
 
-Object of class `betalb`; use
-[`coef()`](https://rdrr.io/r/stats/coef.html),
-[`confint()`](https://rdrr.io/r/stats/confint.html) or
-[`summary()`](https://rdrr.io/r/base/summary.html).
+Returns an object of class `eslb` which is a list with the following
+elements:
+
+- call:
+
+  Function call.
+
+- fit:
+
+  The argument `object`.
+
+- args:
+
+  Function arguments.
+
+- lm_process:
+
+  Sample size, number of regressors, and regressor names.
+
+- est:
+
+  Vector of Cohen's f-squared (`fsq`) and local f-squared.
+
+- intervals:
+
+  Data frame of the estimates and the limits of each significance level.
+
+- diagnostics:
+
+  Solver diagnostics of each endpoint.
+
+- fun:
+
+  Function used ("FSqLB").
+
+## Details
+
+Cohen's f-squared is \\(f^{2} = R^{2} / ( 1 - R^{2} )\\). The local
+f-squared of regressor \\(j\\) is \\(sr^{2}\_{j} / ( 1 - R^{2} )\\). The
+limits of \\(f^{2}\\) are the transformed limits of \\(R^{2}\\). With
+`blocks`, the local f-squared is that of a set of regressors; the
+intervals are conservative (vector projection). The `type` and `control`
+stored in `object` are used.
+
+## References
+
+Selya, A. S., Rose, J. S., Dierker, L. C., Hedeker, D., & Mermelstein,
+R. J. (2012). A practical guide to calculating Cohen's f2, a measure of
+local effect size, from PROC MIXED. *Frontiers in Psychology*, *3*, 111.
+[doi:10.3389/fpsyg.2012.00111](https://doi.org/10.3389/fpsyg.2012.00111)
 
 ## See also
 
-Other Likelihood Effect Extractors:
+Other Beta Likelihood-Based Functions:
 [`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md),
 [`DeltaRSqLB()`](https://jeksterslab.github.io/betaLB/reference/DeltaRSqLB.md),
 [`DiffBetaLB()`](https://jeksterslab.github.io/betaLB/reference/DiffBetaLB.md),
 [`PCorLB()`](https://jeksterslab.github.io/betaLB/reference/PCorLB.md),
 [`RSqLB()`](https://jeksterslab.github.io/betaLB/reference/RSqLB.md),
-[`SCorLB()`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md)
+[`SCorLB()`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md),
+[`SCorSqLB()`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md)
 
 ## Author
 
@@ -42,20 +98,49 @@ Ivan Jacob Agaloos Pesigan
 ## Examples
 
 ``` r
-fit <- stats::lm(formula = mpg ~ wt + hp, data = mtcars)
-out <- LB(object = fit, effects = "fsq", type = "mvn", alpha = 0.05)
-FSqLB(object = out)
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
+)
+
+# BetaLB -------------------------------------------------------------------
+std <- BetaLB(object = object, alpha = 0.05)
+
+# FSqLB --------------------------------------------------------------------
+out <- FSqLB(object = std, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+print(x = out)
 #> Call:
-#> LB(object = fit, type = "mvn", alpha = 0.05, effects = "fsq")
+#> FSqLB(object = std, alpha = 0.05)
 #> 
-#> Likelihood intervals (vector projections are conservative)
-#> type = "mvn"
-#>   effect type alpha estimate  lower   upper lower_status upper_status
-#> 1    fsq  mvn  0.05   4.7732 1.7132 12.1764           ok           ok
-#> 2     wt  mvn  0.05   1.2952 0.4454  3.0609           ok           ok
-#> 3     hp  mvn  0.05   0.4269 0.0714  1.2554           ok           ok
-#>         calibration dimension
-#> 1 vector_projection         2
-#> 2    scalar_profile         1
-#> 3    scalar_profile         1
+#> Cohen's f-squared (fsq) and local f-squared with MVN likelihood intervals:
+#>            est   2.5%   97.5%
+#> fsq     4.1158 1.5260 10.1244
+#> NARTIC  0.9510 0.3655  2.0420
+#> PCTGRT  0.6019 0.1896  1.3981
+#> PCTSUPP 0.2909 0.0516  0.8059
+summary(object = out)
+#> Call:
+#> FSqLB(object = std, alpha = 0.05)
+#> 
+#> Cohen's f-squared (fsq) and local f-squared with MVN likelihood intervals:
+#>            est   2.5%   97.5%
+#> fsq     4.1158 1.5260 10.1244
+#> NARTIC  0.9510 0.3655  2.0420
+#> PCTGRT  0.6019 0.1896  1.3981
+#> PCTSUPP 0.2909 0.0516  0.8059
+coef(object = out)
+#>       fsq    NARTIC    PCTGRT   PCTSUPP 
+#> 4.1157764 0.9509843 0.6018924 0.2909455 
+confint(object = out, level = 0.95)
+#>              2.5 %     97.5 %
+#> fsq     1.52599068 10.1243572
+#> NARTIC  0.36547815  2.0419906
+#> PCTGRT  0.18955186  1.3981149
+#> PCTSUPP 0.05156425  0.8058796
 ```

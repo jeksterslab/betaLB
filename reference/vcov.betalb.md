@@ -1,7 +1,6 @@
-# Sampling Variance-Covariance Matrix Method for an Object of Class `betalb`
+# Sampling Covariance Matrix Method for an Object of Class `betalb`
 
-Sampling Variance-Covariance Matrix Method for an Object of Class
-`betalb`
+Likelihood intervals do not come from a sampling covariance matrix.
 
 ## Usage
 
@@ -18,12 +17,11 @@ vcov(object, ...)
 
 - ...:
 
-  Additional arguments.
+  additional arguments.
 
 ## Value
 
-Stops with an error because profile likelihood intervals do not define a
-covariance matrix.
+Stops with an error.
 
 ## Author
 
@@ -32,11 +30,20 @@ Ivan Jacob Agaloos Pesigan
 ## Examples
 
 ``` r
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-try(stats::vcov(object = object))
-#> Error in vcov.betalb(object = object) : 
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+# try ----------------------------------------------------------------------
+try(vcov(object = out))
+#> Error in vcov.betalb(object = out) : 
 #>   A covariance matrix is not defined for likelihood-based intervals.
 ```

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">betaLB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/betaLB.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -53,68 +54,131 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="betalb">betaLB<a class="anchor" aria-label="anchor" href="#betalb"></a>
 </h1></div>
-<p>Ivan Jacob Agaloos Pesigan 2026-11-12</p>
-<!-- README.md is generated from .setup/readme/README.Rmd. Please edit that file -->
+<p>Ivan Jacob Agaloos Pesigan 2026-11-23 03:19:07</p>
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
 
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Generates profile likelihood confidence intervals for standardized regression coefficients (beta) and other effect sizes, including multiple correlation, semipartial correlations, improvement in R-squared, squared partial correlations, differences in standardized regression coefficients, and Cohen’s f-squared, for models fitted by <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code>.</p>
+<p>Generates profile likelihood confidence intervals for standardized regression coefficients (beta) and other effect sizes, including multiple correlation, semipartial correlations, improvement in R-squared, squared partial correlations, differences in standardized regression coefficients, and Cohen’s f-squared, for models fitted by <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code>. The intervals invert the Gaussian likelihood-ratio test of the covariance matrix of the outcome and the regressors, with a normal-theory or a robust (fourth-moment) cutoff.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the development version of <code>betaLB</code> from <a href="https://github.com/jeksterslab/betaLB" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span>pkgs <span class="op">=</span> <span class="st">"pak"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="st">"jeksterslab/betaLB"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://pak.r-lib.org/" class="external-link">"pak"</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"jeksterslab/betaLB"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="likelihood-intervals">Likelihood intervals<a class="anchor" aria-label="anchor" href="#likelihood-intervals"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Fit once for the effect families, calibration types and confidence levels needed. Extractors select stored results without refitting.</p>
+<p>In this example, a multiple regression model is fitted using program quality ratings (<code>QUALITY</code>) as the regressand/outcome variable and number of published articles attributed to the program faculty members (<code>NARTIC</code>), percent of faculty members holding research grants (<code>PCTGRT</code>), and percentage of program graduates who received support (<code>PCTSUPP</code>) as regressor/predictor variables using a data set from 1982 ratings of 46 doctoral programs in psychology in the USA (National Research Council, 1982). Likelihood-based confidence intervals for the standardized regression coefficients are generated using the <code><a href="reference/BetaLB.html">BetaLB()</a></code> function from the <code>betaLB</code> package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">betaLB</span><span class="fu">::</span><span class="fu"><a href="reference/LB.html">LB</a></span><span class="op">(</span></span>
-<span>  object <span class="op">=</span> <span class="va">fit</span>,</span>
-<span>  effects <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beta"</span>, <span class="st">"rsq"</span><span class="op">)</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mvn"</span>, <span class="st">"robust"</span><span class="op">)</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu">betaLB</span><span class="fu">::</span><span class="fu"><a href="reference/BetaLB.html">BetaLB</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">out</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span>package <span class="op">=</span> <span class="va">betaLB</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">betaLB</span><span class="fu">::</span><span class="va"><a href="reference/nas1982.html">nas1982</a></span></span></code></pre></div>
+<div class="section level3">
+<h3 id="fit-the-regression-model-using-the-lm-function">Fit the regression model using the <code>lm()</code> function.<a class="anchor" aria-label="anchor" href="#fit-the-regression-model-using-the-lm-function"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">QUALITY</span> <span class="op">~</span> <span class="va">NARTIC</span> <span class="op">+</span> <span class="va">PCTGRT</span> <span class="op">+</span> <span class="va">PCTSUPP</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="estimate-the-standardized-regression-slopes-and-the-corresponding-likelihood-based-confidence-intervals">Estimate the standardized regression slopes and the corresponding likelihood-based confidence intervals.<a class="anchor" aria-label="anchor" href="#estimate-the-standardized-regression-slopes-and-the-corresponding-likelihood-based-confidence-intervals"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/BetaLB.html">BetaLB</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">object</span>, type <span class="op">=</span> <span class="st">"mvn"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; betaLB::LB(object = fit, type = c("mvn", "robust"), alpha = c(0.05, </span></span>
-<span><span class="co">#&gt;     0.1), effects = c("beta", "rsq"))</span></span>
+<span><span class="co">#&gt; BetaLB(object = object, type = "mvn", alpha = 0.05)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Likelihood intervals (vector projections are conservative)</span></span>
-<span><span class="co">#&gt; type = "mvn, robust"</span></span>
-<span><span class="co">#&gt;   effect   type alpha estimate   lower   upper lower_status upper_status</span></span>
-<span><span class="co">#&gt; 1     wt    mvn  0.05  -0.6296 -0.7934 -0.4347           ok           ok</span></span>
-<span><span class="co">#&gt; 2     wt    mvn  0.10  -0.6296 -0.7691 -0.4683           ok           ok</span></span>
-<span><span class="co">#&gt; 3     wt robust  0.05  -0.6296 -0.7579 -0.4831           ok           ok</span></span>
-<span><span class="co">#&gt; 4     wt robust  0.10  -0.6296 -0.7385 -0.5079           ok           ok</span></span>
-<span><span class="co">#&gt; 5     hp    mvn  0.05  -0.3615 -0.5538 -0.1628           ok           ok</span></span>
-<span><span class="co">#&gt; 6     hp    mvn  0.10  -0.3615 -0.5231 -0.1959           ok           ok</span></span>
-<span><span class="co">#&gt; 7     hp robust  0.05  -0.3615 -0.4911 -0.2297           ok           ok</span></span>
-<span><span class="co">#&gt; 8     hp robust  0.10  -0.3615 -0.4703 -0.2512           ok           ok</span></span>
-<span><span class="co">#&gt;      calibration dimension</span></span>
-<span><span class="co">#&gt; 1 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 2 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 3 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 4 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 5 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 6 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 7 scalar_profile         1</span></span>
-<span><span class="co">#&gt; 8 scalar_profile         1</span></span>
-<span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span>object <span class="op">=</span> <span class="fu">betaLB</span><span class="fu">::</span><span class="fu"><a href="reference/RSqLB.html">RSqLB</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">out</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;         lower     upper</span></span>
-<span><span class="co">#&gt; rsq 0.6661115 0.9146316</span></span>
-<span><span class="co">#&gt; adj 0.6430847 0.9087442</span></span></code></pre></div>
-<p>Scalar targets use profile-likelihood regions. Multi-coefficient R-squared and block effects use conservative vector projection; the output identifies this calibration and its dimension. Robust calibration assumes independently sampled random regressors and finite fourth moments. It does not supply fixed-regressor or clustered-data inference.</p>
-<p><code>out$intervals</code> contains every computed band and its endpoint statuses. <code>out$diagnostics</code> retains numerical verification details. An unverified endpoint is <code>NA</code>; no Wald endpoint is substituted. Adjusted R-squared is an explicitly sample-size-dependent transformation, and its interval can have a negative lower bound.</p>
+<span><span class="co">#&gt; Standardized regression slopes with MVN likelihood intervals:</span></span>
+<span><span class="co">#&gt;            est   2.5%  97.5%</span></span>
+<span><span class="co">#&gt; NARTIC  0.4951 0.3423 0.6394</span></span>
+<span><span class="co">#&gt; PCTGRT  0.3915 0.2395 0.5426</span></span>
+<span><span class="co">#&gt; PCTSUPP 0.2632 0.1179 0.4148</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="other-features">Other Features<a class="anchor" aria-label="anchor" href="#other-features"></a>
+</h2>
+<p>The package provides the following functions.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/BetaLB.html">BetaLB()</a></code></td>
+<td>Standardized regression coefficients with normal-theory (<code>type = "mvn"</code>) or robust (<code>type = "robust"</code>) likelihood intervals</td>
+</tr>
+<tr>
+<td><code><a href="reference/RSqLB.html">RSqLB()</a></code></td>
+<td>R-squared and adjusted R-squared</td>
+</tr>
+<tr>
+<td><code><a href="reference/DiffBetaLB.html">DiffBetaLB()</a></code></td>
+<td>Differences of standardized regression coefficients</td>
+</tr>
+<tr>
+<td><code><a href="reference/SCorLB.html">SCorLB()</a></code></td>
+<td>Semipartial correlations</td>
+</tr>
+<tr>
+<td><code><a href="reference/SCorSqLB.html">SCorSqLB()</a></code></td>
+<td>Squared semipartial correlations (squared signed interval)</td>
+</tr>
+<tr>
+<td><code><a href="reference/PCorLB.html">PCorLB()</a></code></td>
+<td>Squared partial correlations</td>
+</tr>
+<tr>
+<td><code><a href="reference/DeltaRSqLB.html">DeltaRSqLB()</a></code></td>
+<td>Improvement in R-squared</td>
+</tr>
+<tr>
+<td><code><a href="reference/FSqLB.html">FSqLB()</a></code></td>
+<td>Cohen’s f-squared and local f-squared</td>
+</tr>
+</tbody>
+</table>
+<p>The <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> methods are available for the returned objects. The effect-size functions take the output of <code><a href="reference/BetaLB.html">BetaLB()</a></code> and use its <code>type</code> and <code>control</code>. Scalar targets use profile-likelihood regions; multi-coefficient targets use a conservative vector projection, and the output names the calibration and its dimension. An unverified endpoint is <code>NA</code>; no Wald endpoint is substituted. Robust calibration assumes independently sampled random regressors and finite fourth moments. Examples for each function are in the package vignettes.</p>
+</div>
+<div class="section level2">
+<h2 id="effect-sizes">Effect Sizes<a class="anchor" aria-label="anchor" href="#effect-sizes"></a>
+</h2>
+<p>The definitions, formulas, and notes on the intervals are in the help pages of the functions and in the vignette <a href="https://jeksterslab.github.io/betaLB/articles/example-es-lb.html">betaLB: Example Using the Effect Size Functions</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>See <a href="https://jeksterslab.github.io/betaLB/index.html">GitHub Pages</a> for package documentation.</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>To cite <code>betaLB</code> in publications, please run <code>citation("betaLB")</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2">
+<div id="ref-Dudgeon-2017" class="csl-entry">
+Dudgeon, P. (2017). Some improvements in confidence intervals for standardized regression coefficients. <em>Psychometrika</em>, <em>82</em>(4), 928–951. <a href="https://doi.org/10.1007/s11336-017-9563-z" class="external-link uri">https://doi.org/10.1007/s11336-017-9563-z</a>
+</div>
+<div id="ref-NationalResearchCouncil-1982" class="csl-entry">
+National Research Council. (1982). <em>An assessment of research-doctorate programs in the United States: Social and behavioral sciences</em>. National Academies Press. <a href="https://doi.org/10.17226/9781" class="external-link uri">https://doi.org/10.17226/9781</a>
+</div>
+<div id="ref-RCoreTeam-2026" class="csl-entry">
+R Core Team. (2026). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="external-link uri">https://www.R-project.org/</a>
+</div>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -151,6 +215,8 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment" class="external-link"><img src="https://github.com/jeksterslab/betaLB/actions/workflows/pages/pages-build-deployment/badge.svg" alt="pages-build-deployment"></a></li>
+<li><a href="https://codecov.io/gh/jeksterslab/betaLB" class="external-link"><img src="https://codecov.io/gh/jeksterslab/betaLB/branch/main/graph/badge.svg?token=KVLUET3DJ6" alt="codecov"></a></li>
 <li><a href="https://github.com/jeksterslab/betaLB/actions/workflows/make-all.yml" class="external-link"><img src="https://github.com/jeksterslab/betaLB/actions/workflows/make-all.yml/badge.svg" alt="Make Project (make all)"></a></li>
 <li><a href="https://github.com/jeksterslab/betaLB/actions/workflows/make.yml" class="external-link"><img src="https://github.com/jeksterslab/betaLB/actions/workflows/make.yml/badge.svg" alt="Make Project"></a></li>
 <li><a href="https://github.com/jeksterslab/betaLB/actions/workflows/check-full.yml" class="external-link"><img src="https://github.com/jeksterslab/betaLB/actions/workflows/check-full.yml/badge.svg" alt="R-CMD-check-full"></a></li>

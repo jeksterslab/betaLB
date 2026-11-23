@@ -6,7 +6,7 @@ Confidence Intervals Method for an Object of Class `betalb`
 
 ``` r
 # S3 method for class 'betalb'
-confint(object, parm = NULL, level = 0.95, type = NULL, ...)
+confint(object, parm = NULL, level = 0.95, ...)
 ```
 
 ## Arguments
@@ -17,25 +17,24 @@ confint(object, parm = NULL, level = 0.95, type = NULL, ...)
 
 - parm:
 
-  A specification of which parameters are to be given confidence
-  intervals.
+  a specification of which parameters are to be given confidence
+  intervals, either a vector of numbers or a vector of names. If
+  missing, all parameters are considered.
 
 - level:
 
-  Confidence level of stored intervals. Only already-computed levels are
-  available.
-
-- type:
-
-  Stored calibration type; `NULL` selects the first type.
+  the confidence level required. The likelihood intervals are solved for
+  the significance levels given in `alpha`, so `level` must equal
+  `1 - alpha` for one of them.
 
 - ...:
 
-  Additional arguments.
+  additional arguments.
 
 ## Value
 
-Returns a matrix of confidence intervals.
+Returns a matrix of the lower and upper limits of the likelihood
+intervals.
 
 ## Author
 
@@ -44,11 +43,22 @@ Ivan Jacob Agaloos Pesigan
 ## Examples
 
 ``` r
-object <- structure(
-  list(est = c(x = 0.5), args = list(type = "mvn", alpha = 0.05)),
-  class = "betalb"
+# Data ---------------------------------------------------------------------
+data("nas1982", package = "betaLB")
+
+# Fit Model in lm ----------------------------------------------------------
+object <- stats::lm(
+  formula = QUALITY ~ NARTIC + PCTGRT + PCTSUPP,
+  data = nas1982
 )
-try(stats::confint(object = object))
-#> Error in confint.betalb(object = object) : 
-#>   Confidence intervals are not available.
+
+# BetaLB -------------------------------------------------------------------
+out <- BetaLB(object = object, alpha = 0.05)
+
+## Methods -----------------------------------------------------------------
+confint(object = out, level = 0.95)
+#>             2.5 %    97.5 %
+#> NARTIC  0.3423306 0.6394250
+#> PCTGRT  0.2395150 0.5426127
+#> PCTSUPP 0.1178587 0.4148453
 ```

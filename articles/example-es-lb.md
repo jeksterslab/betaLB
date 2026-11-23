@@ -1,0 +1,131 @@
+# betaLB: Example Using the Effect Size Functions
+
+In this example, a multiple regression model is fitted using program
+quality ratings (`QUALITY`) as the regressand/outcome variable and
+number of published articles attributed to the program faculty members
+(`NARTIC`), percent of faculty members holding research grants
+(`PCTGRT`), and percentage of program graduates who received support
+(`PCTSUPP`) as regressor/predictor variables using a data set from 1982
+ratings of 46 doctoral programs in psychology in the USA (National
+Research Council, 1982).
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(``package ``=`` ``betaLB``)`
+
+\
+`df`` ``<-`` ``betaLB``::`[`nas1982`](https://jeksterslab.github.io/betaLB/reference/nas1982.md)
+
+## Fit the regression model using the `lm()` function.
+
+\
+`object`` ``<-`` ``stats``::`[`lm`](https://rdrr.io/r/stats/lm.html)`(``formula ``=`` ``QUALITY`` ``~`` ``NARTIC`` ``+`` ``PCTGRT`` ``+`` ``PCTSUPP``, data ``=`` ``df``)`
+
+## Estimate the standardized regression slopes.
+
+The effect size functions take the output of
+[`BetaLB()`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)
+and use its `type` and `control`.
+
+\
+`std`` ``<-`` `[`BetaLB`](https://jeksterslab.github.io/betaLB/reference/BetaLB.md)`(``object ``=`` ``object``, type ``=`` ``"robust"``, alpha ``=`` ``0.05``)`
+
+## Semipartial correlations
+
+\
+[`summary`](https://rdrr.io/r/base/summary.html)`(``object ``=`` `[`SCorLB`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md)`(``object ``=`` ``std``, alpha ``=`` ``0.05``)``)`\
+`#> Call:`\
+`#> SCorLB(object = std, alpha = 0.05)`\
+`#> `\
+`#> Semipartial correlations with ROBUST likelihood intervals:`\
+`#>            est   2.5%  97.5%`\
+`#> NARTIC  0.4312 0.3070 0.5680`\
+`#> PCTGRT  0.3430 0.2163 0.4860`\
+`#> PCTSUPP 0.2385 0.1077 0.3859`
+
+## Squared semipartial correlations
+
+The
+[`SCorSqLB()`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md)
+function squares the signed-semipartial interval as a set. If the signed
+interval contains zero, the lower limit of the squared interval is zero.
+
+\
+[`SCorSqLB`](https://jeksterslab.github.io/betaLB/reference/SCorSqLB.md)`(``object ``=`` ``std``, level ``=`` ``0.95``)`\
+`#>               est      lower     upper`\
+`#> NARTIC  0.1858925 0.09422306 0.3226656`\
+`#> PCTGRT  0.1176542 0.04678291 0.2361584`\
+`#> PCTSUPP 0.0568722 0.01160043 0.1489431`
+
+## Squared partial correlations
+
+\
+[`summary`](https://rdrr.io/r/base/summary.html)`(``object ``=`` `[`PCorLB`](https://jeksterslab.github.io/betaLB/reference/PCorLB.md)`(``object ``=`` ``std``, alpha ``=`` ``0.05``)``)`\
+`#> Call:`\
+`#> PCorLB(object = std, alpha = 0.05)`\
+`#> `\
+`#> Squared partial correlations with ROBUST likelihood intervals:`\
+`#>            est   2.5%  97.5%`\
+`#> NARTIC  0.4874 0.2937 0.6525`\
+`#> PCTGRT  0.3757 0.1801 0.5634`\
+`#> PCTSUPP 0.2254 0.0426 0.4578`
+
+## Improvement in R-squared
+
+The improvement in R-squared of regressor j is sr^{2}\_{j}. The `blocks`
+argument gives the improvement of a set of regressors.
+
+\
+[`summary`](https://rdrr.io/r/base/summary.html)`(`\
+`  object ``=`` `[`DeltaRSqLB`](https://jeksterslab.github.io/betaLB/reference/DeltaRSqLB.md)`(`\
+`    object ``=`` ``std``,`\
+`    alpha ``=`` ``0.05``,`\
+`    blocks ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``grants ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"PCTGRT"``, ``"PCTSUPP"``)``)`\
+`  ``)`\
+`)`\
+`#> Call:`\
+`#> DeltaRSqLB(object = std, alpha = 0.05, blocks = list(grants = c("PCTGRT", `\
+`#>     "PCTSUPP")))`\
+`#> `\
+`#> Improvement in R-squared with ROBUST likelihood intervals:`\
+`#>                 est   2.5%  97.5%`\
+`#> NARTIC       0.1859 0.0942 0.3227`\
+`#> PCTGRT       0.1177 0.0468 0.2362`\
+`#> PCTSUPP      0.0569 0.0116 0.1489`\
+`#> block:grants 0.2236 0.0839 0.4585`
+
+## Cohen’s f-squared and local f-squared
+
+\
+[`summary`](https://rdrr.io/r/base/summary.html)`(``object ``=`` `[`FSqLB`](https://jeksterslab.github.io/betaLB/reference/FSqLB.md)`(``object ``=`` ``std``, alpha ``=`` ``0.05``)``)`\
+`#> Call:`\
+`#> FSqLB(object = std, alpha = 0.05)`\
+`#> `\
+`#> Cohen's f-squared (fsq) and local f-squared with ROBUST likelihood intervals:`\
+`#>            est   2.5%   97.5%`\
+`#> fsq     4.1158 1.3593 11.1105`\
+`#> NARTIC  0.9510 0.4158  1.8774`\
+`#> PCTGRT  0.6019 0.2197  1.2903`\
+`#> PCTSUPP 0.2909 0.0445  0.8444`
+
+## Extracting estimates and confidence intervals
+
+\
+`scor`` ``<-`` `[`SCorLB`](https://jeksterslab.github.io/betaLB/reference/SCorLB.md)`(``object ``=`` ``std``, alpha ``=`` ``0.05``)`\
+`stats``::`[`coef`](https://rdrr.io/r/stats/coef.html)`(``object ``=`` ``scor``)`\
+`#>    NARTIC    PCTGRT   PCTSUPP `\
+`#> 0.4311525 0.3430075 0.2384789`\
+`stats``::`[`confint`](https://rdrr.io/r/stats/confint.html)`(``object ``=`` ``scor``, level ``=`` ``0.95``)`\
+`#>             2.5 %    97.5 %`\
+`#> NARTIC  0.3069578 0.5680366`\
+`#> PCTGRT  0.2162936 0.4859613`\
+`#> PCTSUPP 0.1077053 0.3859315`
+
+## References
+
+Dudgeon, P. (2017). Some improvements in confidence intervals for
+standardized regression coefficients. *Psychometrika*, *82*(4), 928–951.
+<https://doi.org/10.1007/s11336-017-9563-z>
+
+National Research Council. (1982). *An assessment of research-doctorate
+programs in the United States: Social and behavioral sciences*. National
+Academies Press. <https://doi.org/10.17226/9781>
